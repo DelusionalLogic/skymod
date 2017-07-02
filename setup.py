@@ -4,7 +4,7 @@ setup(
     name='skymod',
     version='0.4',
     description='A packagemanager for skyrim mods',
-    url='',
+    url='https://github.com/DelusionalLogic/skymod',
     author='Delusional Logic',
     author_email='jesper@slashwin.dk',
     # license='GPLv3',

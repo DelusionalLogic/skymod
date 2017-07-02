@@ -1,0 +1,14 @@
+fuzzywuzzy==0.15.0
+networkx==1.11
+lupa==1.4
+requests==2.18.1
+patool==1.12
+humanize==0.5.1
+asciinet==0.3.1
+setuptools==36.0.1
+tqdm==4.14.0
+colorama==0.3.9
+click==6.7
+GitPython==2.1.5
+path.py==10.3.1
+PyYAML==3.12

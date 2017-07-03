@@ -29,6 +29,9 @@ class AddTransaction(Transaction):
                 return t
         return None
 
+    def _rate_satisfier(self, package):
+        return package.name
+
     def _find_satisfier(self, q):
         dep_package = self._find_satisfier_in_targets(q)
         if dep_package is not None:
@@ -43,6 +46,7 @@ class AddTransaction(Transaction):
             return None
         if len(candidates) == 1:
             return candidates.pop()
+        candidates = sorted(candidates, key=self._rate_satisfier)
         return Q.option("Possible candidates for {}".format(q), candidates)
 
     def _expand_dependencies_to_graph(self):

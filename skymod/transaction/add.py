@@ -29,8 +29,18 @@ class AddTransaction(Transaction):
                 return t
         return None
 
+    # We estimate how well this fits into our current setup by calculating how
+    # many of the current dependencies are already satisfied
     def _rate_satisfier(self, package):
-        return package.name
+        if not package.dependecies:
+            return 0
+        cnt = 0
+        for dep_str in package.dependecies:
+            q = Query(dep_str)
+            if self.local_repo.find_package(q) is not None:
+                continue
+            cnt += 1
+        return cnt / len(package.dependecies)
 
     def _find_satisfier(self, q):
         dep_package = self._find_satisfier_in_targets(q)

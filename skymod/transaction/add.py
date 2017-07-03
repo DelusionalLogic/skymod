@@ -97,6 +97,9 @@ class AddTransaction(Transaction):
             for conflict in t.conflicts:
                 cq = Query(conflict)
                 for tc in self.installs:
+                    # Packages don't conflict with themselves
+                    if t == tc:
+                        continue
                     if cq.matches(tc) and not self._does_bridge(t, tc):
                         conflicts.add((t, tc))
 
@@ -106,6 +109,9 @@ class AddTransaction(Transaction):
             for conflict in t.conflicts:
                 cq = Query(conflict)
                 for lp in local_packages:
+                    # Packages don't conflict with themselves
+                    if t == lp:
+                        continue
                     if cq.matches(lp) and not self._does_bridge(t, lp):
                         conflicts.add((t, lp))
 
@@ -114,6 +120,9 @@ class AddTransaction(Transaction):
             for conflict in lp.conflicts:
                 cq = Query(conflict)
                 for tc in self.installs:
+                    # Packages don't conflict with themselves
+                    if lp == tc:
+                        continue
                     if cq.matches(tc) and not self._does_bridge(lp, tc):
                         conflicts.add((lp, tc))
         return conflicts

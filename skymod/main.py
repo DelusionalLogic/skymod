@@ -90,8 +90,17 @@ def config():
 @click.argument("name", nargs=1)
 @click.argument("value", nargs=1)
 def set_(name, value):
-    section, name = name.split(".")
-    cfg[section][name] = value
+    section, option = name.split(".")
+    try:
+        cfg[section][option] = value
+    except KeyError:
+        print(
+            "Unknown config option {Style.BRIGHT}{}{Style.RESET_ALL}"
+            .format(
+                name,
+                Style=Style
+            )
+        )
 
 
 @config.command()

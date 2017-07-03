@@ -91,31 +91,40 @@ class AddTransaction(Transaction):
         return False
 
     def _find_conflicts(self):
-        #Find conflicts inside targets
+        # Find conflicts inside targets
         conflicts = set()
         for t in self.installs:
             for conflict in t.conflicts:
                 cq = Query(conflict)
                 for tc in self.installs:
+                    # Packages don't conflict with themselves
+                    if t == tc:
+                        continue
                     if cq.matches(tc) and not self._does_bridge(t, tc):
-                        conflicts.add( (t, tc) )
+                        conflicts.add((t, tc))
 
         local_packages = self.local_repo.get_all_packages()
-        #Find conflicts from targets to local_repo
+        # Find conflicts from targets to local_repo
         for t in self.installs:
             for conflict in t.conflicts:
                 cq = Query(conflict)
                 for lp in local_packages:
+                    # Packages don't conflict with themselves
+                    if t == lp:
+                        continue
                     if cq.matches(lp) and not self._does_bridge(t, lp):
-                        conflicts.add( (t, lp) )
+                        conflicts.add((t, lp))
 
-        #Find conflicts from local_repo to targets
+        # Find conflicts from local_repo to targets
         for lp in local_packages:
             for conflict in lp.conflicts:
                 cq = Query(conflict)
                 for tc in self.installs:
+                    # Packages don't conflict with themselves
+                    if lp == tc:
+                        continue
                     if cq.matches(tc) and not self._does_bridge(lp, tc):
-                        conflicts.add( (lp, tc) )
+                        conflicts.add((lp, tc))
         return conflicts
 
     def expand(self):

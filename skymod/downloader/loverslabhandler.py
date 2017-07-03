@@ -3,13 +3,14 @@ from .handler import Handler
 from urllib.parse import urlparse
 from tqdm import tqdm
 import requests
-import query
+import skymod.query as query
 
 import time
 
-from cfg import config
+from skymod.cfg import config
 
 cfg = config.ll
+
 
 class LoversLabHandler(Handler):
     scheme = "ll"

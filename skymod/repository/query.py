@@ -1,4 +1,4 @@
-from package import Version
+from skymod.package import Version
 
 from enum import Enum
 import re

@@ -1,14 +1,12 @@
 from .packagerepo import PackageRepo
 from .errors import AlreadyInstalledError
-from package import load_local_package
+from skymod.package import load_local_package
+
 from datetime import datetime
-import networkx as nx
-from .query import Query
-from package.install_reason import InstallReason
+
 import yaml
 from path import Path
-from graph.installed import InstalledGraph, RootNode
-from graph.dependency import DependencySolver
+
 
 class LocalPackageRepo(PackageRepo):
     def __init__(self, root):

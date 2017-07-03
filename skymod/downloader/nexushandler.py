@@ -4,11 +4,12 @@ from urllib.parse import urlparse
 from tqdm import tqdm
 import requests
 
-import query
+import skymod.query as query
 
-from cfg import config
+from skymod.cfg import config
 
 cfg = config.nexus
+
 
 class NexusHandler(Handler):
     scheme = "nexus"

@@ -1,8 +1,7 @@
 from tqdm import tqdm
-import hashlib
-from dirhashmap import DirMap
+from skymod.dirhashmap import DirMap
 
-from cfg import config as cfg
+from skymod.cfg import config as cfg
 
 class DownloadAction(object):
     def __init__(self, handlers, uri, to):

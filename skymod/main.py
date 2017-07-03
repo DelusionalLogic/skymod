@@ -1,27 +1,27 @@
 import click
 from path import Path
-import query as Q
+import skymod.query as Q
 import humanize
 
-from cfg import read_config
-from cfg import config as cfg
+from .cfg import read_config
+from .cfg import config as cfg
 
-from package import load_package
-from package import InstallReason
+from skymod.package import load_package
+from skymod.package import InstallReason
 
-from repository import GitRemotePackageRepo
-from repository import LocalPackageRepo
-from repository import Query
+from skymod.repository import GitRemotePackageRepo
+from skymod.repository import LocalPackageRepo
+from skymod.repository import Query
 
-from transaction import AddTransaction, RemoveTransaction, UpgradeTransaction
-from transaction import (
+from skymod.transaction import AddTransaction, RemoveTransaction, UpgradeTransaction
+from skymod.transaction import (
     TransactionCycleError,
     DependencyBreakError,
     ConflictError,
     MissingDependencyError
 )
 
-from downloader import Downloader, NexusHandler, LoversLabHandler
+from skymod.downloader import Downloader, NexusHandler, LoversLabHandler
 
 from colorama import Fore, Style
 import colorama

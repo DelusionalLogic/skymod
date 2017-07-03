@@ -1,12 +1,12 @@
 from .state import TransactionState
-import networkx as nx
+
+from skymod.repository import Query
 
 from path import Path
 from colorama import Style, Fore
 import patoolib
 from tqdm import tqdm
 
-from repository import Query
 
 class Transaction(object):
     def __init__(self, local_repo, repo, downloader):

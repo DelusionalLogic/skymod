@@ -1,23 +1,21 @@
 from .transaction import Transaction
 from .state import TransactionState
 from .errors import TransactionCycleError, ConflictError, MissingDependencyError
-from package import InstallReason
+from skymod.package import InstallReason
 import networkx as nx
 
-from dirhashmap import DirMap
+from skymod.dirhashmap import DirMap
 
-from cfg import config as cfg
-import hashlib
+from skymod.cfg import config as cfg
 
-from config.vfs import VirtualFS
+from skymod.config.vfs import VirtualFS
 
-from path import Path
 from colorama import Style, Fore
 import patoolib
 from tqdm import tqdm
 
-from repository import Query
-import query as Q
+from skymod.repository import Query
+import skymod.query as Q
 
 
 class AddTransaction(Transaction):

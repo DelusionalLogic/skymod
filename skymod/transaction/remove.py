@@ -1,14 +1,11 @@
 from .transaction import Transaction
 from .state import TransactionState
 from .errors import DependencyBreakError, ConflictError
-import networkx as nx
 
-from path import Path
 from colorama import Style, Fore
 
-from repository import Query
-from package import InstallReason
-import query as Q
+from skymod.repository import Query
+from skymod.package import InstallReason
 
 # To remove a package we just delete the pkgins and remove the package from the
 # local database

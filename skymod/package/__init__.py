@@ -4,7 +4,7 @@ from .localluaconfigproxy import LocalLuaPackageConfigProxy
 from .install_reason import InstallReason
 from .sourceline import SourceLine
 
-from config.runtimesandbox import RuntimeSandbox
+from skymod.config.runtimesandbox import RuntimeSandbox
 
 import yaml
 

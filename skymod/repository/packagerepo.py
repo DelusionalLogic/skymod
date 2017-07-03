@@ -1,8 +1,8 @@
-from package import load_package
+from skymod.package import load_package
 from .query import Mod
 from .query import Query
 
-from cfg import config as cfg
+from skymod.cfg import config as cfg
 
 from colorama import Fore, Style
 from path import Path

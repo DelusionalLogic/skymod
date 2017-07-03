@@ -26,6 +26,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        skymod=src.main:cli
+        skymod=skymod.main:cli
     ''',
 )

@@ -33,7 +33,7 @@ _options = {
 }
 
 def _write_defaults(path):
-    if not path.parent.exists():
+    if not path.parent == "" and not path.parent.exists():
         path.parent.makedirs()
     cp = SafeConfigParser()
 
@@ -111,4 +111,8 @@ class Config(object):
         section = Section(self.path, self.cp, key)
         return section
 
-config = Config(Path("./test.ini"))
+def read_config(path):
+    global config
+    config = Config(path)
+
+read_config(_home / ".modbuild/config.ini")

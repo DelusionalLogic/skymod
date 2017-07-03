@@ -1,6 +1,6 @@
 from .packagerepo import PackageRepo
 from .errors import AlreadyInstalledError
-from package import load_config, load_local_config
+from package import load_local_package
 from datetime import datetime
 import networkx as nx
 from .query import Query
@@ -18,7 +18,7 @@ class LocalPackageRepo(PackageRepo):
         pkgins = Path("dist")
         pkgsrc = Path("source")
 
-        config = load_local_config(path / "modbuild.lua", pkgsrc, pkgins, path / "meta.yml")
+        config = load_local_package(path / "modbuild.lua", pkgsrc, pkgins, path / "meta.yml")
 
         return config
 

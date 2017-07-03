@@ -1,4 +1,4 @@
-from package import load_config
+from package import load_package
 from .query import Mod
 from .query import Query
 
@@ -16,7 +16,7 @@ class PackageRepo(object):
     def _load_package(self, path):
         pkgins = Path("dist")
         pkgsrc = cfg.source.dir
-        config = load_config(path / "modbuild.lua", pkgsrc, pkgins)
+        config = load_package(path / "modbuild.lua", pkgsrc, pkgins)
 
         return config
 
@@ -29,13 +29,13 @@ class PackageRepo(object):
     def find_literal(self, query):
         package_dir = self.root / query.name
         if not package_dir.exists():
-            return set()
+            return None
         config = self._load_package(package_dir)
         if config is None:
-            return set()
+            return None
         if query.matches(config):
-            return {config}
-        return set()
+            return config
+        return None
 
     def _find_provider(self, query, exclude):
         candidates = set()
@@ -109,7 +109,7 @@ class PackageRepo(object):
         if query.name not in (e.name for e in exclude):
             package = self.find_literal(query)
             if package:
-                return package
+                return { package }
         #Literal package not found, looking for a provider
         package = self._find_provider(query, exclude)
         return package

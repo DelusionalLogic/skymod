@@ -10,12 +10,12 @@ import yaml
 
 _runtime = RuntimeSandbox()
 
-def load_config(path, pkgsrc, pkgins):
+def load_package(path, pkgsrc, pkgins):
     config = _runtime.load_file(path)
     proxy = LuaPackageConfigProxy(path, config, pkgsrc, pkgins)
     return proxy
 
-def load_local_config(path, pkgsrc, pkgins, metadata_path):
+def load_local_package(path, pkgsrc, pkgins, metadata_path):
     config = _runtime.load_file(path)
     with open(metadata_path, "r") as infile:
         metadata = yaml.load(infile)

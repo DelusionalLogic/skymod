@@ -1,48 +1,54 @@
 import click
-import os
-from config.runtimesandbox import RuntimeSandbox
-from urllib.parse import urlparse
 from path import Path
-import patoolib
-from lupa import LuaError
 import query as Q
 import humanize
 
+from cfg import read_config
 from cfg import config as cfg
 
-from package import LuaPackageConfigProxy
-from package import load_config
-from package import Version, InstallReason
+from package import load_package
+from package import InstallReason
 
 from repository import GitRemotePackageRepo
 from repository import LocalPackageRepo
 from repository import Query
 
-from transaction import AddTransaction, RemoveTransaction
-from transaction import TransactionCycleError, DependencyBreakError, ConflictError, MissingDependencyError
+from transaction import AddTransaction, RemoveTransaction, UpgradeTransaction
+from transaction import (
+    TransactionCycleError,
+    DependencyBreakError,
+    ConflictError,
+    MissingDependencyError
+)
 
-from downloader import Downloader, NexusHandler, LoversLabHandler, StubHandler
-
-from graph.dependency import DependencySolver
+from downloader import Downloader, NexusHandler, LoversLabHandler
 
 from colorama import Fore, Style
 import colorama
 
 colorama.init()
 
+
 @click.group()
-def cli():
-    pass
+@click.option("--config", "-c", help="Configuration file")
+def cli(config):
+    if config:
+        read_config(Path(config))
+
 
 @cli.group()
 def cache():
     pass
 
+
 @cache.command()
 def clear():
     cache_dir = cfg.cache.dir
     source_dir = cfg.source.dir
-    if not Q.yes_no("Are you sure? This will remove cache and source dir", default="no"):
+    if not Q.yes_no(
+            "Are you sure? This will remove cache and source dir",
+            default="no",
+            ):
         return
 
     for d in cache_dir.dirs():
@@ -50,6 +56,7 @@ def clear():
 
     for d in source_dir.dirs():
         d.rmtree()
+
 
 @cache.command()
 def size():
@@ -64,12 +71,20 @@ def size():
     for f in source_dir.walkfiles():
         source_size += f.size
 
-    print("{Style.BRIGHT}Cache: {Style.RESET_ALL} {}".format(humanize.naturalsize(cache_size, binary=True), Style=Style))
-    print("{Style.BRIGHT}Source:{Style.RESET_ALL} {}".format(humanize.naturalsize(source_size, binary=True), Style=Style))
+    print("{Style.BRIGHT}Cache: {Style.RESET_ALL} {}".format(
+        humanize.naturalsize(cache_size, binary=True),
+        Style=Style
+    ))
+    print("{Style.BRIGHT}Source:{Style.RESET_ALL} {}".format(
+        humanize.naturalsize(source_size, binary=True),
+        Style=Style
+    ))
+
 
 @cli.group()
 def config():
     pass
+
 
 @config.command("set")
 @click.argument("name", nargs=1)
@@ -78,11 +93,13 @@ def set_(name, value):
     section, name = name.split(".")
     cfg[section][name] = value
 
+
 @config.command()
 @click.argument("name", nargs=1)
 def get(name):
     section, name = name.split(".")
     print(cfg[section][name])
+
 
 @cli.group()
 def package():
@@ -99,12 +116,16 @@ def package():
     repo_dir = cfg.repo.dir
     if not repo_dir.exists():
         repo_dir.makedirs()
-    repo = GitRemotePackageRepo(repo_dir, "https://github.com/DelusionalLogic/modbuild-repo.git")
+    repo = GitRemotePackageRepo(
+        repo_dir,
+        "https://github.com/DelusionalLogic/modbuild-repo.git"
+    )
 
     local_dir = cfg.local.dir
     if not local_dir.exists():
         local_dir.makedirs()
     local_repo = LocalPackageRepo(local_dir)
+
 
 # @HACK This is super hacky! we should have some template or something
 def make_full_graph():
@@ -131,18 +152,29 @@ def make_full_graph():
         print("*Unmanaged: Unofficial High Resolution Patch", file=f)
         print("*Unmanaged: Unofficial Skyrim Patch", file=f)
 
+
 @package.command()
 def sync():
     print("Syncing remote repo")
     repo.update()
 
+
 @package.command()
 @click.argument("packages", nargs=-1)
-@click.option("--explicit", "-e", multiple=True, help="Explicit package descriptor files to include")
-def install(packages, explicit):
+@click.option(
+    "--explicit",
+    "-e",
+    multiple=True,
+    help="Explicit package descriptor files to include"
+)
+@click.option('--upgrade/--no-upgrade', default=False)
+def install(packages, explicit, upgrade):
     # Create the queries from the strings
     qs = [Query(p) for p in packages]
-    t = AddTransaction(local_repo, repo, downloader)
+    if upgrade:
+        t = UpgradeTransaction(local_repo, repo, downloader)
+    else:
+        t = AddTransaction(local_repo, repo, downloader)
 
     # Support for loading out of tree package specifications
     for e_path in explicit:
@@ -152,15 +184,26 @@ def install(packages, explicit):
         pkgsrc = cfg.source.dir
         e = Path(e_path)
         if not e.exists():
-            print("Explicit package at {Style.BRIGHT}{}{Style.RESET_ALL} not found".format(e, Style=Style, Fore=Fore))
+            print(
+                "Explicit package at {Style.BRIGHT}{}{Style.RESET_ALL} "
+                "not found"
+                .format(
+                    e,
+                    Style=Style,
+                    Fore=Fore
+                )
+            )
             exit(1)
-        package = load_config(e, pkgsrc, pkgins)
+        package = load_package(e, pkgsrc, pkgins)
         t.add(package)
 
     for q in qs:
         package = repo.find_package(q)
         if package is None:
-            print("No package named {Style.BRIGHT}{}{Style.RESET_ALL}".format(q, Style=Style))
+            print("No package named {Style.BRIGHT}{}{Style.RESET_ALL}".format(
+                q,
+                Style=Style
+            ))
             return
         t.add(package)
 
@@ -171,23 +214,52 @@ def install(packages, explicit):
         # @ENHANCEMENT We should really run visualize on the graph that failed.
         # That would be way more helpful
         print("ERROR Cycle detected: ")
-        print("\tCycle consists of: {}".format(", ".join( (p.name for p in e.cycle) )))
+        print("\tCycle consists of: {}".format(
+            ", ".join((p.name for p in e.cycle))
+        ))
         exit(1)
     except ConflictError as e:
         # We found some conflicts which means we need to look for some package
         # to bridge them that aren't part of the transaction
         print("{Fore.RED}Conflicting packages{Fore.RESET}".format(Fore=Fore))
         for conflict in e.conflicts:
-            print("{Style.BRIGHT}{}{Style.RESET_ALL} conflicts with {Style.BRIGHT}{}{Style.RESET_ALL}".format(*conflict, Style=Style))
+            print(
+                "{Style.BRIGHT}{}{Style.RESET_ALL} conflicts with "
+                "{Style.BRIGHT}{}{Style.RESET_ALL}"
+                .format(
+                    *conflict,
+                    Style=Style
+                )
+            )
             bridges = repo.find_bridges(*conflict)
             for bridge in bridges:
-                print("\t{Style.BRIGHT}{}{Style.RESET_ALL} could bridge that conflict".format(bridge, Style=Style))
+                print(
+                    "\t{Style.BRIGHT}{}{Style.RESET_ALL} could bridge "
+                    "that conflict"
+                    .format(
+                        bridge,
+                        Style=Style
+                    )
+                )
         exit(1)
     except MissingDependencyError as e:
-        print("{Fore.RED}Unresolved dependencies{Fore.RESET}".format(Fore=Fore))
+        print("{Fore.RED}Unresolved dependencies{Fore.RESET}".format(
+            Fore=Fore
+        ))
         for missing in e.dependencies:
-            print("{Style.BRIGHT}{}{Style.RESET_ALL} requires {Style.BRIGHT}{}{Style.RESET_ALL} which wasn't found".format(*missing, Style=Style))
+            print(
+                "{Style.BRIGHT}{}{Style.RESET_ALL} requires "
+                "{Style.BRIGHT}{}{Style.RESET_ALL} which wasn't found"
+                .format(
+                    *missing,
+                    Style=Style
+                )
+            )
         exit(1)
+
+    if not t.targets:
+        print("Nothing to do".format(Style=Style, Fore=Fore))
+        exit(0)
 
     print("")
     print("This will install the following packages: ")
@@ -199,6 +271,7 @@ def install(packages, explicit):
     t.commit()
     make_full_graph()
 
+
 @package.command()
 @click.argument("packages", nargs=-1)
 def remove(packages):
@@ -207,7 +280,13 @@ def remove(packages):
     for q in qs:
         package = local_repo.find_package(q)
         if package is None:
-            print("No installed package named {Style.BRIGHT}{}{Style.RESET_ALL}".format(q, Style=Style))
+            print(
+                "No installed package named {Style.BRIGHT}{}{Style.RESET_ALL}"
+                .format(
+                    q,
+                    Style=Style
+                )
+            )
             return
         t.add(package)
 
@@ -218,24 +297,59 @@ def remove(packages):
         # This is possible because we have bridges
         print("{Fore.RED}Conflicting packages{Fore.RESET}".format(Fore=Fore))
         for (bridge, conflict) in e.conflicts:
-            print("Removing {Style.BRIGHT}{}{Style.RESET_ALL} would break bridge of {Style.BRIGHT}{}{Style.RESET_ALL} and {Style.BRIGHT}{}{Style.RESET_ALL}".format(bridge, *conflict, Style=Style))
+            print(
+                "Removing {Style.BRIGHT}{}{Style.RESET_ALL} would break "
+                "bridge of {Style.BRIGHT}{}{Style.RESET_ALL} and "
+                "{Style.BRIGHT}{}{Style.RESET_ALL}"
+                .format(
+                    bridge,
+                    *conflict, Style=Style
+                )
+            )
             bridges = repo.find_bridges(*conflict, exclude=t.targets)
             for bridge in bridges:
-                print("\t {Style.BRIGHT}{}{Style.RESET_ALL} is an alternative bridge".format(bridge, Style=Style))
+                print(
+                    "\t{Style.BRIGHT}{}{Style.RESET_ALL} is an "
+                    "alternative bridge"
+                    .format(
+                        bridge,
+                        Style=Style
+                    )
+                )
             if not bridges:
-                print("\t {Fore.RED}Unfortunately{Fore.RESET} I don't know of any alternative".format(Fore=Fore))
+                print(
+                    "\t {Fore.RED}Unfortunately{Fore.RESET} I don't know of "
+                    "any alternative"
+                    .format(
+                        Fore=Fore
+                    )
+                )
         exit(1)
     except DependencyBreakError as e:
         print("")
-        print("Removal would {Style.BRIGHT}break{Style.RESET_ALL} dependencies: ".format(Style=Style))
+        print(
+            "Removal would {Style.BRIGHT}break{Style.RESET_ALL} dependencies: "
+            .format(
+                Style=Style
+            )
+        )
         for p in e.dependencies:
-            print("\t{Style.BRIGHT}{}{Style.RESET_ALL} depends on {Style.BRIGHT}{}{Style.RESET_ALL}".format(*p, Style=Style))
+            print(
+                "\t{Style.BRIGHT}{}{Style.RESET_ALL} depends on "
+                "{Style.BRIGHT}{}{Style.RESET_ALL}"
+                .format(
+                    *p,
+                    Style=Style
+                )
+            )
             exit(1)
-
 
     print("")
     print("This will remove the following packages: ")
-    print("PACKAGES: {Style.BRIGHT}{}".format(", ".join(map(str, t.removes)), Style=Style))
+    print("PACKAGES: {Style.BRIGHT}{}".format(
+        ", ".join(map(str, t.removes)),
+        Style=Style
+    ))
     print("")
     Q.yes_no("Are you sure?")
 
@@ -244,16 +358,34 @@ def remove(packages):
     # @DEAD
     except DependencyBreakError as e:
         print("")
-        print("Removal would {Style.BRIGHT}break{Style.RESET_ALL} dependencies: ".format(Style=Style))
+        print(
+            "Removal would {Style.BRIGHT}break{Style.RESET_ALL} dependencies: "
+            .format(
+                Style=Style
+            )
+        )
         for p in e.dependencies:
-            print("\t{Style.BRIGHT}{}{Style.RESET_ALL} depends on {Style.BRIGHT}{}{Style.RESET_ALL}".format(*p, Style=Style))
+            print(
+                "\t{Style.BRIGHT}{}{Style.RESET_ALL} depends on "
+                "{Style.BRIGHT}{}{Style.RESET_ALL}"
+                .format(
+                    *p,
+                    Style=Style
+                )
+            )
             exit(1)
 
     t.commit()
     make_full_graph()
 
+
 @package.command()
-@click.option('-r', '--reverse', count=True, help="Reverse results, putting the best match at the bottom")
+@click.option(
+    '-r',
+    '--reverse',
+    count=True,
+    help="Reverse results, putting the best match at the bottom"
+)
 @click.argument("term", nargs=-1)
 def search(term, reverse):
 
@@ -266,8 +398,10 @@ def search(term, reverse):
         print("{}/{} {}".format(
             Fore.MAGENTA + package.name + Style.RESET_ALL,
             package.version,
+            # @HACK terrible way of adding that tag. It'll do for now though
             "" if local_pkg is None else Fore.YELLOW + "[installed={}]".format(local_pkg.version) + Style.RESET_ALL
             ))
+
 
 # @ENHANCEMENT It would be great it you could visualize as part of the other
 # operations
@@ -300,6 +434,7 @@ def visualize():
 
     print(graph_to_ascii(G))
 
+
 # Show details about a package
 @package.command()
 @click.argument("package_q", nargs=1)
@@ -307,11 +442,14 @@ def details(package_q):
     q = Query(package_q)
     package = local_repo.find_package(q)
     if package is None:
-        print("No package named {Style.BRIGHT}{}{Style.RESET_ALL}".format(q, Style=Style))
+        print("No package named {Style.BRIGHT}{}{Style.RESET_ALL}".format(
+            q,
+            Style=Style
+        ))
         exit(1)
 
     required_by = [str(p) for p in local_repo.find_dependants(package)]
-    deps = [ str(d) for d in package.dependecies]
+    deps = [str(d) for d in package.dependecies]
 
     bridges = set()
     for (b1, b2) in package.bridges:
@@ -324,14 +462,23 @@ def details(package_q):
         "Name": package.name,
         "Version": package.version,
         "Installed on": package.install_date.strftime("%d/%m/%y"),
+        "Provides": "  ".join(package.provides),
         "Depends On": "  ".join(deps),
         "Required By": "  ".join(required_by),
         "Conflicts with": "  ".join(package.conflicts),
         "Bridges": "  ".join(bridges),
-        "Reason": "Explicitly installed" if package.reason == InstallReason.REQ else "Dependency",
+        "Reason":
+            "Explicitly installed"
+            if package.reason == InstallReason.REQ
+            else "Dependency",
     }
-    for k,v in info.items():
-        print("{Style.BRIGHT}{0:<20}{Style.RESET_ALL}: {1}".format(k,v, Style=Style))
+    for k, v in info.items():
+        print("{Style.BRIGHT}{0:<20}{Style.RESET_ALL}: {1}".format(
+            k,
+            v,
+            Style=Style
+        ))
+
 
 if __name__ == '__main__':
     cli()

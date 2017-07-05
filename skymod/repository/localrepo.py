@@ -1,6 +1,6 @@
 from .packagerepo import PackageRepo
 from .errors import AlreadyInstalledError
-from skymod.package import load_local_package
+import skymod.package
 
 from datetime import datetime
 
@@ -16,7 +16,12 @@ class LocalPackageRepo(PackageRepo):
         pkgins = Path("dist")
         pkgsrc = Path("source")
 
-        config = load_local_package(path / "modbuild.lua", pkgsrc, pkgins, path / "meta.yml")
+        config = skymod.package.load_local_package(
+            path / "modbuild.lua",
+            pkgsrc,
+            pkgins,
+            path / "meta.yml"
+        )
 
         return config
 

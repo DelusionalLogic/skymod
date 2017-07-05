@@ -1,4 +1,4 @@
-from skymod.package import load_package
+import skymod.package
 from .query import Mod
 from .query import Query
 
@@ -16,7 +16,9 @@ class PackageRepo(object):
     def _load_package(self, path):
         pkgins = Path("dist")
         pkgsrc = cfg.source.dir
-        config = load_package(path / "modbuild.lua", pkgsrc, pkgins)
+        config = skymod.package.load_package(
+            path / "modbuild.lua", pkgsrc, pkgins
+        )
 
         return config
 

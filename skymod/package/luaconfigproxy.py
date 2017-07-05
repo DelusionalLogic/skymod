@@ -1,7 +1,6 @@
 from .version import Version
 from .sourceline import SourceLine
 
-from path import Path
 
 class LuaPackageConfigProxy(object):
     def __init__(self, path, config, pkgsrc, pkgins):
@@ -13,6 +12,18 @@ class LuaPackageConfigProxy(object):
     @property
     def name(self):
         return self.config.env.name
+
+    @property
+    def version(self):
+        if not self.config.env.version:
+            return Version("1")
+        return Version(self.config.env.version)
+
+    @property
+    def desc(self):
+        if not self.config.env.desc:
+            return ""
+        return self.config.env.desc
 
     @property
     def dependecies(self):
@@ -31,12 +42,6 @@ class LuaPackageConfigProxy(object):
         if not self.config.env.provides:
             return []
         return [self.config.env.provides[i] for i in self.config.env.provides]
-
-    @property
-    def version(self):
-        if not self.config.env.version:
-            return Version("1")
-        return Version(self.config.env.version)
 
     @property
     def sources(self):
@@ -59,6 +64,20 @@ class LuaPackageConfigProxy(object):
             p = v.split("::")
             b.add( (p[0], p[1]) )
         return b
+
+    @property
+    def optdepends(self):
+        # @HACK we should be parsing the string here
+        if not self.config.env.optdepends:
+            return []
+        o = []
+        for v in [
+                    self.config.env.optdepends[i]
+                    for i in self.config.env.optdepends
+                ]:
+            p = v.split("::")
+            o.append((p[0], p[1]))
+        return o
 
     @property
     def is_local(self):

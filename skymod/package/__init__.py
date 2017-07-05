@@ -3,6 +3,7 @@ from .version import Version
 from .localluaconfigproxy import LocalLuaPackageConfigProxy
 from .install_reason import InstallReason
 from .sourceline import SourceLine
+from .printer import print_local_package
 
 from skymod.config.runtimesandbox import RuntimeSandbox
 

@@ -13,6 +13,7 @@ from skymod.package import print_local_package
 from skymod.repository import GitRemotePackageRepo
 from skymod.repository import LocalPackageRepo
 from skymod.repository import Query
+from skymod.packagelist import PackageList, InstalledTag, WantedTag
 
 from skymod.transaction import AddTransaction, RemoveTransaction, UpgradeTransaction
 from skymod.transaction import (
@@ -428,16 +429,45 @@ def search(term, reverse):
 
     candidates = repo.search(" ".join(term))
     if reverse:
-        candidates = reversed(candidates)
-    for package in candidates:
+        candidates = list(reversed(candidates))
+
+    lst = PackageList(candidates)
+    for package in lst:
+        # Set all the tags
         q = Query(package.name)
         local_pkg = local_repo.find_package(q)
-        print("{}/{} {}".format(
-            Fore.MAGENTA + package.name + Style.RESET_ALL,
-            package.version,
-            # @HACK terrible way of adding that tag. It'll do for now though
-            "" if local_pkg is None else Fore.YELLOW + "[installed={}]".format(local_pkg.version) + Style.RESET_ALL
-            ))
+
+        # Having a local package means it's currently installed. Fill in the
+        # tag with the version
+        if local_pkg:
+            lst.add_tag(package, InstalledTag(local_pkg.version))
+
+    lst.present()
+
+
+@local.command("search")
+@click.option(
+    '-r',
+    '--reverse',
+    count=True,
+    help="Reverse results, putting the best match at the bottom"
+)
+@click.argument("term", nargs=-1)
+def local_search(term, reverse):
+    candidates = local_repo.search(" ".join(term))
+    if reverse:
+        candidates = list(reversed(candidates))
+
+    lst = PackageList(candidates)
+    for package in lst:
+        # We dont tag installed packages, since we already print the local
+        # version information
+
+        # Lets tag explicitly installed packages
+        if package.reason == InstallReason.REQ:
+            lst.add_tag(package, WantedTag())
+
+    lst.present()
 
 
 # @ENHANCEMENT It would be great it you could visualize as part of the other

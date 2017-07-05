@@ -5,8 +5,10 @@ from collections import namedtuple
 from os.path import expanduser
 _home = Path(expanduser("~"))
 
+
 def to_bool(name):
     return name.lower() in ("true", )
+
 
 ValueRecords = namedtuple("ValueRecords", "default, to_type")
 _options = {
@@ -32,6 +34,7 @@ _options = {
         },
 }
 
+
 def _write_defaults(path):
     if not path.parent == "" and not path.parent.exists():
         path.parent.makedirs()
@@ -44,6 +47,7 @@ def _write_defaults(path):
 
     with open(path, "w") as f:
         cp.write(f)
+
 
 def _write_missing(path):
     cp = SafeConfigParser()
@@ -58,6 +62,7 @@ def _write_missing(path):
 
     with open(path, "w") as f:
         cp.write(f)
+
 
 class Section(object):
     def __init__(self, path, cp, name):
@@ -111,8 +116,10 @@ class Config(object):
         section = Section(self.path, self.cp, key)
         return section
 
+
 def read_config(path):
     global config
     config = Config(path)
+
 
 read_config(_home / ".modbuild/config.ini")

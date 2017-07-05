@@ -151,7 +151,7 @@ def init():
 
 
 @cli.group()
-def package():
+def remote():
     init()
 
 
@@ -187,13 +187,13 @@ def make_full_graph():
         print("*Unmanaged: Unofficial Skyrim Patch", file=f)
 
 
-@package.command()
+@remote.command()
 def sync():
     print("Syncing remote repo")
     repo.update()
 
 
-@package.command()
+@remote.command()
 @click.argument("packages", nargs=-1)
 @click.option(
     "--explicit",
@@ -308,7 +308,7 @@ def install(packages, explicit, upgrade):
     make_full_graph()
 
 
-@package.command()
+@local.command()
 @click.argument("packages", nargs=-1)
 def remove(packages):
     qs = [Query(p) for p in packages]
@@ -415,7 +415,7 @@ def remove(packages):
     make_full_graph()
 
 
-@package.command()
+@remote.command()
 @click.option(
     '-r',
     '--reverse',
@@ -441,7 +441,7 @@ def search(term, reverse):
 
 # @ENHANCEMENT It would be great it you could visualize as part of the other
 # operations
-@package.command()
+@local.command()
 def visualize():
     import networkx as nx
     # How about we don't fire up a JVM just to start my script?
@@ -472,7 +472,7 @@ def visualize():
 
 
 # Show details about a package
-@package.command()
+@local.command()
 @click.argument("package_q", nargs=1)
 def details(package_q):
     q = Query(package_q)

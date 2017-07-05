@@ -16,13 +16,16 @@ _options = {
             "dir": ValueRecords(_home / ".modbuild/repo", Path),
         },
         "cache": {
-            "dir": ValueRecords(_home / ".modbuild/cache",  Path)
+            "dir": ValueRecords(_home / ".modbuild/cache",  Path),
         },
         "local": {
-            "dir": ValueRecords(_home / ".modbuild/local",  Path)
+            "dir": ValueRecords(_home / ".modbuild/local",  Path),
         },
         "source": {
-            "dir": ValueRecords(_home / ".modbuild/source",  Path)
+            "dir": ValueRecords(_home / ".modbuild/source",  Path),
+        },
+        "mo": {
+            "dir": ValueRecords(Path(""),  Path),
         },
         "nexus": {
             "username": ValueRecords("", str),

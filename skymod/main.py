@@ -119,8 +119,7 @@ def get(name):
         )
 
 
-@cli.group()
-def package():
+def init():
     global repo, local_repo, downloader, qs
 
     downloader = Downloader()
@@ -149,6 +148,16 @@ def package():
             "ModOrganizer2 installation directory not set. Please set mo.dir"
         )
         exit(1)
+
+
+@cli.group()
+def package():
+    init()
+
+
+@cli.group()
+def local():
+    init()
 
 
 # @HACK This is super hacky! we should have some template or something
@@ -206,6 +215,8 @@ def install(packages, explicit, upgrade):
         # @HACK this should be a config option and also maybe not specified
         # here?
         pkgins = cfg.mo.dir / "mods"
+        if not pkgins.exists():
+            pkgins.mkdir()
         pkgsrc = cfg.source.dir
         e = Path(e_path)
         if not e.exists():

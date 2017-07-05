@@ -144,11 +144,18 @@ def package():
         local_dir.makedirs()
     local_repo = LocalPackageRepo(local_dir)
 
+    if cfg.mo.dir == "" or not cfg.mo.dir.exists():
+        print(
+            "ModOrganizer2 installation directory not set. Please set mo.dir"
+        )
+        exit(1)
+
 
 # @HACK This is super hacky! we should have some template or something
 def make_full_graph():
     import networkx as nx
-    with open("profile/modlist.txt", "w") as f:
+    modlist_path = cfg.mo.dir / "profile/default/modlist.txt"
+    with open(modlist_path, "w") as f:
         G = nx.DiGraph()
         for package in local_repo.get_all_packages():
             G.add_node(package)
@@ -198,7 +205,7 @@ def install(packages, explicit, upgrade):
     for e_path in explicit:
         # @HACK this should be a config option and also maybe not specified
         # here?
-        pkgins = Path("dist")
+        pkgins = cfg.mo.dir / "mods"
         pkgsrc = cfg.source.dir
         e = Path(e_path)
         if not e.exists():

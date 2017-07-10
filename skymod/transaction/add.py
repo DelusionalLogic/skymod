@@ -127,8 +127,7 @@ class AddTransaction(Transaction, ConflictFinder):
                 self.upgrades.append(local_package)
 
         # Preload all the fetches into a set of files to get, by doing so we
-        # can have a global download progress bar, and also get all the
-        # interactivity out of the way
+        # can have a global download progress bar.
         fetches = set()
         for t in self.installs:
             print("Collecting sources from {}".format(t.name))

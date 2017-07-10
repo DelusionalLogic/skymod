@@ -14,6 +14,7 @@ from skymod.repository import GitRemotePackageRepo
 from skymod.repository import LocalPackageRepo
 from skymod.repository import Query
 from skymod.packagelist import PackageList, InstalledTag, WantedTag
+from skymod.dirhashmap import DirMap
 
 from skymod.transaction import AddTransaction, RemoveTransaction, UpgradeTransaction
 from skymod.transaction import (
@@ -34,8 +35,12 @@ colorama.init()
 @click.group()
 @click.option("--config", "-c", help="Configuration file")
 def cli(config):
+    global down_cache
+
     if config:
         read_config(Path(config))
+
+    down_cache = DirMap(cfg.cache.dir)
 
 
 @cli.group()
@@ -124,7 +129,7 @@ def get(name):
 def init():
     global repo, local_repo, downloader, qs
 
-    downloader = Downloader()
+    downloader = Downloader(down_cache)
 
     handler = NexusHandler()
     downloader.add_handler(handler)

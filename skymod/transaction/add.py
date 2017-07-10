@@ -1,6 +1,8 @@
 from .transaction import Transaction
 from .state import TransactionState
 from .errors import TransactionCycleError, ConflictError, MissingDependencyError
+from .conflictfinder import ConflictFinder
+
 from skymod.package import InstallReason
 import networkx as nx
 
@@ -18,7 +20,7 @@ from skymod.repository import Query
 import skymod.query as Q
 
 
-class AddTransaction(Transaction):
+class AddTransaction(Transaction, ConflictFinder):
     def __init__(self, installed, repo, downloader):
         super().__init__(installed, repo, downloader)
         self.source_map = DirMap(cfg.source.dir)
@@ -87,60 +89,6 @@ class AddTransaction(Transaction):
         self.touches = nx.topological_sort(self.depend_G, reverse=True)
         self.installs = [target for target in self.touches if not target.is_local]
 
-    def _does_bridge(self, p1, p2):
-        # Do we have a bridge already installed?
-        installed_bridges = self.local_repo.find_bridges(p1, p2)
-        if installed_bridges:
-            return True
-
-        # Do any of the packages we are about to install offer to bridge this?
-        for package in self.installs:
-            for bridge in package.bridges:
-                b1 = Query(bridge[0])
-                b2 = Query(bridge[1])
-                if b1.matches(p1) and b2.matches(p2):
-                    return True
-                elif b2.matches(p1) and b1.matches(p2):
-                    return True
-        return False
-
-    def _find_conflicts(self):
-        # Find conflicts inside targets
-        conflicts = set()
-        for t in self.installs:
-            for conflict in t.conflicts:
-                cq = Query(conflict)
-                for tc in self.installs:
-                    # Packages don't conflict with themselves
-                    if t == tc:
-                        continue
-                    if cq.matches(tc) and not self._does_bridge(t, tc):
-                        conflicts.add((t, tc))
-
-        local_packages = self.local_repo.get_all_packages()
-        # Find conflicts from targets to local_repo
-        for t in self.installs:
-            for conflict in t.conflicts:
-                cq = Query(conflict)
-                for lp in local_packages:
-                    # Packages don't conflict with themselves
-                    if t == lp:
-                        continue
-                    if cq.matches(lp) and not self._does_bridge(t, lp):
-                        conflicts.add((t, lp))
-
-        # Find conflicts from local_repo to targets
-        for lp in local_packages:
-            for conflict in lp.conflicts:
-                cq = Query(conflict)
-                for tc in self.installs:
-                    # Packages don't conflict with themselves
-                    if lp == tc:
-                        continue
-                    if cq.matches(tc) and not self._does_bridge(lp, tc):
-                        conflicts.add((lp, tc))
-        return conflicts
-
     def expand(self):
         assert(self.state == TransactionState.INIT)
 
@@ -158,7 +106,7 @@ class AddTransaction(Transaction):
 
         self._sort_deps_to_targets()
 
-        conflicts = self._find_conflicts()
+        conflicts = super()._find_conflicts(self.installs, self.local_repo)
         if len(conflicts) > 0:
             # There were at least some conflicts
             raise ConflictError(conflicts)

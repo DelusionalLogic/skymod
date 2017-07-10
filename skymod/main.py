@@ -35,12 +35,17 @@ colorama.init()
 @click.group()
 @click.option("--config", "-c", help="Configuration file")
 def cli(config):
-    global down_cache
+    global down_cache, src_cache
 
     if config:
+        print("A")
         read_config(Path(config))
+    else:
+        read_default_config()
 
+    print(cfg.cache.dir)
     down_cache = DirMap(cfg.cache.dir)
+    src_cache = DirMap(cfg.source.dir)
 
 
 @cli.group()
@@ -58,12 +63,9 @@ def clear():
             ):
         return
 
-    for d in cache_dir.dirs():
-        d.rmtree()
+    down_cache.clear()
 
-    for d in source_dir.dirs():
-        d.rmtree()
-
+    src_cache.clear()
 
 @cache.command()
 def size():
@@ -215,7 +217,7 @@ def install(packages, explicit, upgrade):
     if upgrade:
         t = UpgradeTransaction(local_repo, repo, downloader)
     else:
-        t = AddTransaction(local_repo, repo, downloader)
+        t = AddTransaction(local_repo, repo, downloader, src_cache)
 
     # Support for loading out of tree package specifications
     for e_path in explicit:

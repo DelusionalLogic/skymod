@@ -42,6 +42,11 @@ class DirMap(object):
         self.temp.mkdir()
         return self.temp
 
+    def clear(self):
+        assert(self.transaction_dest is None)
+        for d in self.container_dir.dirs():
+            d.rmtree()
+
     def abort(self):
         self.temp.rmtree()
         self.transaction_dest = None

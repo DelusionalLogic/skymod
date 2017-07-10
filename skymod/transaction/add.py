@@ -21,9 +21,9 @@ import skymod.query as Q
 
 
 class AddTransaction(Transaction, ConflictFinder):
-    def __init__(self, installed, repo, downloader):
+    def __init__(self, installed, repo, downloader, cache=None):
         super().__init__(installed, repo, downloader)
-        self.source_map = DirMap(cfg.source.dir)
+        self.source_map = cache or DirMap(cfg.source.dir)
 
     def _find_satisfier_in_targets(self, query):
         for t in self.targets:

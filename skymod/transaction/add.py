@@ -227,14 +227,17 @@ class AddTransaction(Transaction):
                 self.local_repo.remove_package(t)
                 break
 
-        print("{} package {}".format("Upgrading" if is_upgrade else "Installing", target))
+        desc = "{} package {}".format(
+            "Upgrading" if is_upgrade else "Installing",
+            target.name
+        )
 
         # This is where we do the actual installation. We will need to
         # translate all the paths, since we are doing some hash/caching earlier
         srcdir = target.pkgsrc
         insdir = target.pkgins
         insdir.mkdir()
-        for (f, t) in tqdm(target.config.package_files):
+        for (f, t) in tqdm(target.config.package_files, desc=desc):
             from_ = srcdir / f
             to = insdir / t
 

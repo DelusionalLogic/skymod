@@ -1,6 +1,7 @@
 import hashlib
 from contextlib import contextmanager
 
+
 class DirMap(object):
     def __init__(self, container_dir):
         self.container_dir = container_dir
@@ -32,7 +33,7 @@ class DirMap(object):
         return False
 
     def alloc(self, key):
-        if self.has_key(key):
+        if key in self:
             raise KeyError("{} already in map".format(key))
 
         self.transaction_dest = self._get_path_safe(key)
@@ -52,7 +53,7 @@ class DirMap(object):
     @contextmanager
     def atomic_add(m, key):
         h = m.alloc(key)
-        try: 
+        try:
             yield h
         except Exception:
             m.abort()
@@ -60,7 +61,7 @@ class DirMap(object):
         m.commit()
 
     def get(self, key):
-        if not self.has_key(key):
+        if key not in self:
             raise KeyError("{} not in map".format(key))
 
         key_path = self._get_path_safe(key)
@@ -69,4 +70,3 @@ class DirMap(object):
     def remove(self, key):
         key_path = self._get_path_safe(key)
         key_path.rmtree()
-

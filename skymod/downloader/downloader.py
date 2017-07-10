@@ -14,7 +14,7 @@ class Downloader(object):
 
     def fetch_file(self, uri, filename):
         # Is the uri cached
-        if self.cache.has_key(uri):
+        if uri in self.cache:
             tqdm.write("{} found in cache".format(uri))
             return self.cache.get(uri) / "file"
 

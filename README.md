@@ -55,14 +55,14 @@ you have used a package manager previously.
 Package operations are usually located under the `package` subcommand.
 To find a package you want to install:
 
-    skymod package search --reverse <TERMS>
+    skymod remote search --reverse <TERMS>
 
 Which will give you a list of packages matching your search term, sorted
 by relevance. The reverse option places the best matching at the bottom
 of the list. Once you have found the package you want to install,
 install it:
 
-    skymod package install <PACKAGE_NAMES>
+    skymod remote install <PACKAGE_NAMES>
 
 This will resolve all the dependencies of the package, and make sure you
 won't have any conflicts. It will then download and unpack all the
@@ -132,7 +132,9 @@ follows:
         Letters and special characters are NOT supported. Generally the
         version specifier follows the SemVer format, but allows for any
         number of parts.
-    desc: A short description of the package
+	desc: A short description of the package. Please keep it shorter
+		than 80 characters. The best descriptions continues the sentence
+		"This mod is a ..." without including it.
     depends: A list of packages this package depends on, formatted as
         query strings.
     provides: A list of package this package can be used as a standin

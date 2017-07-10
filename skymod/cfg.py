@@ -120,9 +120,19 @@ class Config(object):
         return section
 
 
-def read_config(path):
-    global config
-    config = Config(path)
+class ConfRef(object):
+    def __init__(self, val=None):
+        self.val = val
+
+    def __getattr__(self, key):
+        return self.val.__getattr__(key)
+
+    def __getitem__(self, key):
+        return self.val.__getitem__(key)
 
 
-read_config(_home / ".modbuild/config.ini")
+def read_config(path=_home / ".modbuild/config.ini"):
+    config.val = Config(path)
+
+
+config = ConfRef()

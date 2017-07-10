@@ -38,12 +38,10 @@ def cli(config):
     global down_cache, src_cache
 
     if config:
-        print("A")
         read_config(Path(config))
     else:
-        read_default_config()
+        read_config()
 
-    print(cfg.cache.dir)
     down_cache = DirMap(cfg.cache.dir)
     src_cache = DirMap(cfg.source.dir)
 

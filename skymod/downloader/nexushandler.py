@@ -8,8 +8,6 @@ import skymod.query as query
 
 from skymod.cfg import config
 
-cfg = config.nexus
-
 
 class NexusHandler(Handler):
     scheme = "nexus"
@@ -17,6 +15,7 @@ class NexusHandler(Handler):
     headers = {"User-Agent": "Nexus Client v0.53.2"}
 
     def __init__(self):
+        self.cfg = config.nexus
         self.session = requests.Session()
 
         self.initialized = False
@@ -33,12 +32,12 @@ class NexusHandler(Handler):
     def fetch(self, uri, filename):
         if not self.initialized:
             self.initialized = True
-            if cfg.username == "":
+            if self.cfg.username == "":
                 raise Exception("Nexus username wasn't set. Please set nexus.username and optionally nexus.password")
-            password = cfg.password
+            password = self.cfg.password
             if password == "":
                 password = query.password("Nexus password: ")
-            self._perform_login(cfg.username, password)
+            self._perform_login(self.cfg.username, password)
         parts = urlparse(uri)
         mod_id = parts.netloc
 

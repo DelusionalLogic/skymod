@@ -3,6 +3,7 @@ from skymod.dirhashmap import DirMap
 
 from skymod.cfg import config as cfg
 
+
 class DownloadAction(object):
     def __init__(self, handlers, uri, to):
         self.handlers = handlers
@@ -17,6 +18,7 @@ class DownloadAction(object):
             if handler.accept(self.uri):
                 handler.fetch(self.uri, self.to)
 
+
 class CopyAction(object):
     def __init__(self, from_, to):
         self.from_ = from_
@@ -28,10 +30,11 @@ class CopyAction(object):
     def execute(self):
         self.from_.copy(self.to)
 
+
 class Downloader(object):
-    def __init__(self):
+    def __init__(self, cache=None):
         self.handlers = set()
-        self.cache = DirMap(cfg.cache.dir)
+        self.cache = cache or DirMap(cfg.cache.dir)
 
     def add_handler(self, handler):
         self.handlers.add(handler)
@@ -57,7 +60,10 @@ class Downloader(object):
                 actions.append(DownloadAction(self.handlers, uri, to))
                 uri_to_path[uri] = to
             else:
-                print("{} was already downloaded in this transaction".format(uri))
+                print(
+                    "{} was already downloaded in this transaction"
+                    .format(uri)
+                )
                 actions.append(CopyAction(uri_to_path[uri], to))
         return actions
 

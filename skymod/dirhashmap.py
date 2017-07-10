@@ -23,6 +23,9 @@ class DirMap(object):
         return key_path
 
     def has_key(self, key):
+        return self.__contains__(key)
+
+    def __contains__(self, key):
         key_path = self._get_path_safe(key)
         if key_path.exists():
             return True

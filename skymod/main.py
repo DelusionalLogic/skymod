@@ -251,6 +251,7 @@ def install(packages, explicit, upgrade):
         # Some form of dependency cycle
         # @ENHANCEMENT We should really run visualize on the graph that failed.
         # That would be way more helpful
+        # -- We can't use asciinet since installing it is a pain
         print("ERROR Cycle detected: ")
         print("\tCycle consists of: {}".format(
             ", ".join((p.name for p in e.cycle))

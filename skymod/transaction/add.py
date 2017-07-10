@@ -114,6 +114,7 @@ class AddTransaction(Transaction, ConflictFinder):
 
     def prepare(self):
         assert(self.state == TransactionState.EXPANDED)
+        # Find all the packages that are upgrades rather than installs
         for package in self.touches:
             if not package.is_local:
                 # Search for just the name to check if we have any version locally

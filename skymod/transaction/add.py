@@ -161,6 +161,13 @@ class AddTransaction(Transaction, ConflictFinder):
         # @COMPLETE package_files should probably be checked for problems
         # BEFORE we allow a commit
 
+        # @COMPLETE We should check if there's space on the disk for a copy of
+        # package_files before we allow a commit. Currently a lack of space
+        # breaks a package install. This can cause various issues.
+
+        # @COMPLETE we should check if we can remove the packages first if it's
+        # an upgrade
+
         self.state = TransactionState.PREPARED
 
     def _commit_package(self, target):

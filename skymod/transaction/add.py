@@ -141,7 +141,7 @@ class AddTransaction(Transaction, ConflictFinder):
         # require us to translate the paths coming out of the scripts, but so
         # be it
         for (uri, archive_path) in files.items():
-            if self.source_map.has_key(uri):
+            if uri in self.source_map:
                 continue
 
             with self.source_map.atomic_add(uri) as unpack_dir:

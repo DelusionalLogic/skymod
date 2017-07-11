@@ -31,8 +31,8 @@ class AddTransaction(Transaction, ConflictFinder):
                 return t
         return None
 
-    # We estimate how well this fits into our current setup by calculating how
-    # many of the current dependencies are already satisfied
+    # We estimate how well this fits into our current setup by calculating the
+    # ratio of dependencies already satisfied to total dependencies
     def _rate_satisfier(self, package):
         if not package.dependecies:
             return 0

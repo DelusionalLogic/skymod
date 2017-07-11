@@ -111,7 +111,7 @@ class LuaPackageConfigProxy(object):
         return "{}={}".format(self.name, self.version)
 
     def __repr__(self):
-        return self.name
+        return "<{}={}>".format(self.name, self.version)
 
     def __eq__(self, other):
         if type(other) == str:

@@ -4,6 +4,8 @@ import skymod.package
 
 from datetime import datetime
 
+from skymod.cfg import config as cfg
+
 import yaml
 from path import Path
 
@@ -13,8 +15,8 @@ class LocalPackageRepo(PackageRepo):
         super().__init__(root)
 
     def _load_package(self, path):
-        pkgins = Path("dist")
-        pkgsrc = Path("source")
+        pkgins = cfg.mo.dir / "mods"
+        pkgsrc = cfg.source.dir
 
         config = skymod.package.load_local_package(
             path / "modbuild.lua",

@@ -24,21 +24,7 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
     def __init__(self, installed, repo, downloader, cache=None):
         super().__init__(installed, repo, downloader)
         self.source_map = cache or DirMap(cfg.source.dir)
-
-    def packages_to_graph(self, targets):
-        G = nx.DiGraph()
-        for package in targets:
-            G.add_node(package)
-            for dep_name in package.dependecies:
-                q = Query(dep_name)
-                dep_package = self._find_satisfier_in_set(targets, q)
-                if dep_package is None:
-                    raise Exception(
-                        "Tried to make a graph out of packages that "
-                        "have unresolved dependencies"
-                    )
-                G.add_edge(package, dep_package)
-        return G
+        self.removes = []
 
     def _sort_deps_to_targets(self):
         assert(self.state == TransactionState.INIT)
@@ -48,11 +34,16 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
     def expand(self):
         assert(self.state == TransactionState.INIT)
 
-        (expanded, missing) = self._expand_depedencies(self.local_repo, self.repo, self.targets)
-        self.depend_G = self.packages_to_graph(expanded)
-
+        (expanded, missing) = self._expand_depedencies(
+            self.local_repo,
+            self.repo,
+            self.targets,
+            exclude=self.removes
+        )
         if len(missing) > 0:
             raise MissingDependencyError(missing)
+
+        self.depend_G = super().packages_to_graph(expanded)
 
         try:
             cycle = next(nx.simple_cycles(self.depend_G))
@@ -63,16 +54,8 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
 
         self._sort_deps_to_targets()
 
-        conflicts = super()._find_conflicts(self.installs, self.local_repo)
-        if len(conflicts) > 0:
-            # There were at least some conflicts
-            raise ConflictError(conflicts)
-        self.state = TransactionState.EXPANDED
-
-    def prepare(self):
-        assert(self.state == TransactionState.EXPANDED)
         # Find all the packages that are upgrades rather than installs
-        for package in self.touches:
+        for package in expanded:
             if not package.is_local:
                 # Search for just the name to check if we have any version locally
                 q = Query(package.name)
@@ -81,7 +64,16 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
                 # an "upgrade"
                 if local_package is None:
                     continue
-                self.upgrades.append(local_package)
+                self.removes.append(local_package)
+
+        conflicts = super()._find_conflicts(self.installs, self.local_repo)
+        if len(conflicts) > 0:
+            # There were at least some conflicts
+            raise ConflictError(conflicts)
+        self.state = TransactionState.EXPANDED
+
+    def prepare(self):
+        assert(self.state == TransactionState.EXPANDED)
 
         # Preload all the fetches into a set of files to get, by doing so we
         # can have a global download progress bar.
@@ -129,16 +121,6 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
 
     def _commit_package(self, target):
         is_upgrade = False
-        # Remove all the upgrades first, they'll be installed again when we get
-        # to installing
-        for t in self.upgrades:
-            if t.name == target.name:
-                is_upgrade = True
-                if target.pkgins.exists():
-                    target.pkgins.rmtree()
-                self.local_repo.remove_package(t)
-                break
-
         desc = "{} package {}".format(
             "Upgrading" if is_upgrade else "Installing",
             target.name
@@ -172,6 +154,14 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
 
     def commit(self):
         assert(self.state == TransactionState.PREPARED)
+
+        for target in self.removes:
+            # Remove all the upgrades first, they'll be installed again when we
+            # get to installing
+            print("Removing {}".format(target))
+            if target.pkgins.exists():
+                target.pkgins.rmtree()
+            self.local_repo.remove_package(target)
 
         for target in self.installs:
             self._commit_package(target)

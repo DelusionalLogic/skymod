@@ -25,11 +25,14 @@ class AddTransaction(Transaction, ConflictFinder):
         super().__init__(installed, repo, downloader)
         self.source_map = cache or DirMap(cfg.source.dir)
 
-    def _find_satisfier_in_targets(self, query):
-        for t in self.targets:
+    def _find_satisfier_in_set(self, set_, query):
+        for t in set_:
             if query.matches(t):
                 return t
         return None
+
+    def _find_satisfier_in_targets(self, query):
+        return self._find_satisfier_in_set(self.targets, query)
 
     # We estimate how well this fits into our current setup by calculating the
     # ratio of dependencies already satisfied to total dependencies
@@ -61,28 +64,43 @@ class AddTransaction(Transaction, ConflictFinder):
         candidates = sorted(candidates, key=self._rate_satisfier)
         return Q.option("Possible candidates for {}".format(q), candidates)
 
-    def _expand_dependencies_to_graph(self):
-        assert(self.state == TransactionState.INIT)
+    def _expand_depedencies(self, targets):
         missing = set()
-        G = nx.DiGraph()
-        queue = list(self.targets)
-        seen = set(self.targets)
+        queue = list(targets)
+        seen = set()
         while queue:
             package = queue.pop()
-            G.add_node(package)
+            if package in seen:
+                continue
+            seen.add(package)
+
             for dep_name in package.dependecies:
                 q = Query(dep_name)
                 dep_package = self._find_satisfier(q)
+
+                # We couldn't find a satisfier
                 if dep_package is None:
-                    missing.add( (package, q) )
+                    missing.add((package, q))
                     self.unresolved.append(q)
                     continue
 
+                queue.append(dep_package)
+        return (seen, missing)
+
+    def packages_to_graph(self, targets):
+        G = nx.DiGraph()
+        for package in targets:
+            G.add_node(package)
+            for dep_name in package.dependecies:
+                q = Query(dep_name)
+                dep_package = self._find_satisfier_in_set(targets, q)
+                if dep_package is None:
+                    raise Exception(
+                        "Tried to make a graph out of packages that "
+                        "have unresolved dependencies"
+                    )
                 G.add_edge(package, dep_package)
-                if not dep_package in seen:
-                    seen.add(dep_package)
-                    queue.append(dep_package)
-        return (G, missing)
+        return G
 
     def _sort_deps_to_targets(self):
         assert(self.state == TransactionState.INIT)
@@ -92,7 +110,8 @@ class AddTransaction(Transaction, ConflictFinder):
     def expand(self):
         assert(self.state == TransactionState.INIT)
 
-        (self.depend_G, missing) = self._expand_dependencies_to_graph()
+        (expanded, missing) = self._expand_depedencies(self.targets)
+        self.depend_G = self.packages_to_graph(expanded)
 
         if len(missing) > 0:
             raise MissingDependencyError(missing)

@@ -25,7 +25,8 @@ _options = {
             "dir": ValueRecords(_home / ".modbuild/source",  Path),
         },
         "mo": {
-            "dir": ValueRecords(Path(""),  Path),
+            "mods_dir": ValueRecords(Path(""),  Path),
+            "profile_dir": ValueRecords(Path(""),  Path),
         },
         "nexus": {
             "username": ValueRecords("", str),

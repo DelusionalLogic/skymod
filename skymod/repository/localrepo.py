@@ -15,7 +15,7 @@ class LocalPackageRepo(PackageRepo):
         super().__init__(root)
 
     def _load_package(self, path):
-        pkgins = cfg.mo.dir / "mods"
+        pkgins = cfg.mo.mods_dir
         pkgsrc = cfg.source.dir
 
         config = skymod.package.load_local_package(

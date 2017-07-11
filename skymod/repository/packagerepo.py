@@ -14,7 +14,7 @@ class PackageRepo(object):
         self.root = root
 
     def _load_package(self, path):
-        pkgins = cfg.mo.dir / "mods"
+        pkgins = cfg.mo.mods_dir
         pkgsrc = cfg.source.dir
         config = skymod.package.load_package(
             path / "modbuild.lua", pkgsrc, pkgins

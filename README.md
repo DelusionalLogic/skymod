@@ -34,7 +34,8 @@ order. MO2 will still be in charge of load-order and launching the game.
 Ideally skymod should have its own MO2 installation, since it will mess
 with your previously installed mods.
 
-    skymod config set mo.dir <MO2_INSTALL_DIR>
+    skymod config set mo.mods_dir <MO2_MODS_DIR>
+    skymod config set mo.profile_dir <MO2_PROFILE_DIR>
 
 There are a few other configuration options, which can be found in the
 configuration file located at: `~/.modbuild/config.ini`.

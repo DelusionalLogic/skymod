@@ -53,7 +53,7 @@ Usage
 Using skymod is pretty easy once you get the hang of it, especially if
 you have used a package manager previously.
 
-Package operations are usually located under the `package` subcommand.
+Operations on the remote repo are located under the `remote` subcommand
 To find a package you want to install:
 
     skymod remote search --reverse <TERMS>

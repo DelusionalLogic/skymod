@@ -27,7 +27,7 @@ class GitRemotePackageRepo(PackageRepo):
                 self.repo = git.Repo.clone_from(
                     remote,
                     root,
-                    progress=bar.update_t
+                    progress=bar.update_to
                 )
         else:
             self.repo = git.Repo(root)

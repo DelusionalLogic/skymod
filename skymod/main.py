@@ -69,8 +69,6 @@ def cache():
 
 @cache.command()
 def clear():
-    cache_dir = cfg.cache.dir
-    source_dir = cfg.source.dir
     if not Q.yes_no(
             "Are you sure? This will remove cache and source dir",
             default="no",
@@ -80,6 +78,7 @@ def clear():
     down_cache.clear()
 
     src_cache.clear()
+
 
 @cache.command()
 def size():

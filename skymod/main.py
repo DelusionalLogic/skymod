@@ -349,9 +349,23 @@ def install(packages, explicit, upgrade):
 
 @local.command()
 @click.argument("packages", nargs=-1)
-def remove(packages):
+@click.option(
+    "--no-dep",
+    is_flag=True,
+    default=False,
+    help="Skip dependency checking",
+)
+def remove(packages, no_dep):
+    # Skipping dependency checking can be dangerous. Lets print a nice big
+    # warning to make sure the user knows what they are doing.
+    if no_dep:
+        print(
+            "{Fore.YELLOW}{Style.BRIGHT}Warning:{Style.RESET_ALL}"
+            " depedency checking disabled"
+            .format(Style=Style, Fore=Fore)
+        )
     qs = [Query(p) for p in packages]
-    t = RemoveTransaction(local_repo, repo, downloader)
+    t = RemoveTransaction(local_repo, repo, downloader, no_dep)
     for q in qs:
         package = local_repo.find_package(q)
         if package is None:

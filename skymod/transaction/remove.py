@@ -25,7 +25,8 @@ from skymod.package import InstallReason
 # To remove a package we just delete the pkgins and remove the package from the
 # local database
 class RemoveTransaction(Transaction):
-    def __init__(self, installed, repo, downloader):
+    def __init__(self, installed, repo, downloader, skipdep = False):
+        self.skipdep = skipdep
         super().__init__(installed, repo, downloader)
         pass
 
@@ -120,19 +121,24 @@ class RemoveTransaction(Transaction):
     def expand(self):
         assert(self.state == TransactionState.INIT)
 
-        # Remove all the packages that are owned by a target
-        # (dependencies that are no longer needed)
-        self.removes = self._get_owned()
-        # @COMPLETE Support removal on unnecessary dependencies
+        # Skipping dependencies just skips everything and sets the removal
+        # packages to the explicit targets. This is very useful for replace
+        # packages in-place
+        if self.skipdep:
+            self.removes = self.targets
+        else:
+            # Remove all the packages that are owned by a target
+            # (dependencies that are no longer needed)
+            self.removes = self._get_owned()
 
-        # Ensure that we don't remove a bridge
-        conflicts = self._find_bridge_conflicts()
-        if conflicts:
-            raise ConflictError(conflicts)
+            # Ensure that we don't remove a bridge
+            conflicts = self._find_bridge_conflicts()
+            if conflicts:
+                raise ConflictError(conflicts)
 
-        dependants = self._find_downstreams()
-        if dependants:
-            raise DependencyBreakError(dependants)
+            dependants = self._find_downstreams()
+            if dependants:
+                raise DependencyBreakError(dependants)
 
         self.state = TransactionState.EXPANDED
 

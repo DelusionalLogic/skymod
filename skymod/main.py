@@ -200,6 +200,16 @@ def make_full_graph():
             for dep_name in package.dependecies:
                 q = Query(dep_name)
                 dep = local_repo.find_package(q)
+
+                if dep is None:
+                    # Skip mising dependecies. If we have an installed package
+                    # which has a not installed dependency, then we just want
+                    # to skip it. It's up to the user to make sure everything
+                    # is resolved, of course assisted by the tool.
+                    # @COMPLETE it might be useful give the user some way of
+                    # doing a full dependency verification of the local repo
+                    continue
+
                 G.add_edge(package, dep)
         for package in nx.topological_sort(G):
             print("+" + package.name, file=f)

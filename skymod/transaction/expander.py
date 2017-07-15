@@ -46,6 +46,7 @@ class Expander(object):
             cnt += 1
         return cnt / len(package.dependecies)
 
+    # @COMPLETE Maybe this should be some kind of strategy/mixin
     def _find_satisfier(self, local_repo, repo, q, targets, exclude):
         dep_package = self._find_satisfier_in_set(
             targets,
@@ -86,6 +87,13 @@ class Expander(object):
                 continue
             seen.add(package)
 
+            # We don't want to expand dependencies for a package that is
+            # already installed. The user might have intentionally ignored
+            # dependencies when they installed the package, so we are just
+            # going to assume they know what they are doing.
+            if package.is_local:
+                continue
+
             for dep_name in package.dependecies:
                 q = Query(dep_name)
                 dep_package = self._find_satisfier(
@@ -113,9 +121,11 @@ class Expander(object):
                 q = Query(dep_name)
                 dep_package = self._find_satisfier_in_set(targets, q)
                 if dep_package is None:
-                    raise Exception(
-                        "Tried to make a graph out of packages that "
-                        "have unresolved dependencies: " + str(q)
-                    )
+                    # Swallow the error, since this is expected in some cases
+                    continue
+                    # raise Exception(
+                    #     "Tried to make a graph out of packages that "
+                    #     "have unresolved dependencies: " + str(q)
+                    # )
                 G.add_edge(package, dep_package)
         return G

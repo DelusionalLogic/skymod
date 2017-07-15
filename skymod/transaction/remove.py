@@ -18,10 +18,9 @@ from .transaction import Transaction
 from .state import TransactionState
 from .errors import DependencyBreakError, ConflictError
 
-from colorama import Style, Fore
-
 from skymod.repository import Query
 from skymod.package import InstallReason
+
 
 # To remove a package we just delete the pkgins and remove the package from the
 # local database
@@ -38,7 +37,10 @@ class RemoveTransaction(Transaction):
 
     def _dependencies_filled_by_other(self, package):
         for dep_string in package.dependecies:
-            dep_packages = self.local_repo.find_packages(Query(dep_string), exclude=self.targets)
+            dep_packages = self.local_repo.find_packages(
+                Query(dep_string),
+                exclude=self.targets
+            )
             if not dep_packages:
                 return False
         return True
@@ -50,7 +52,7 @@ class RemoveTransaction(Transaction):
                 if self._dependencies_filled_by_other(dep):
                     continue
                 if dep not in self.targets:
-                    dependants.add( (dep, package) )
+                    dependants.add((dep, package))
         return dependants
 
     def _does_bridge_after(self, p1, p2):
@@ -61,7 +63,6 @@ class RemoveTransaction(Transaction):
     # Check for a potential conflict between two package
     def _check_conflict(self, p1, p2):
         # Does p1 conflict with p2
-        conflicts = set()
         for conflict in p1.conflicts:
             cq = Query(conflict)
             if cq.matches(p2) and not self._does_bridge_after(p1, p2):
@@ -74,7 +75,8 @@ class RemoveTransaction(Transaction):
                 return p2, p1
 
     # A package might bridge dependecies
-    # To check those we enumerate all the bridges and check that they would be fine
+    # To check those we enumerate all the bridges and check that they would be
+    # fine
     def _find_bridge_conflicts(self):
         conflicts = set()
         for package in self.removes:
@@ -82,14 +84,15 @@ class RemoveTransaction(Transaction):
                 p1 = self.local_repo.find_package(Query(b1))
                 p2 = self.local_repo.find_package(Query(b2))
                 if not p1 or not p2:
-                    # One of the sides were not installed, which means it's fine
+                    # One of the sides were not installed, which means it's
+                    # fine
                     continue
                 if p1 in self.removes or p2 in self.removes:
                     # We are about to remove one of the sides. It's fine
                     continue
                 conflict = self._check_conflict(p1, p2)
                 if conflict:
-                    conflicts.add( (package, conflict) )
+                    conflicts.add((package, conflict))
         return conflicts
 
     # @SPEED This is very slow and should probably be sped up. I don't know how

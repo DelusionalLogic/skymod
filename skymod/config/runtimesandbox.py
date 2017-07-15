@@ -42,7 +42,7 @@ def install(context, from_str, to_str=""):
 
     from_ = context.source_lookup.translate(from_)
 
-    for d in from_.glob(""):
+    for d in Path().glob(from_):
         from_ = d
         if not is_subdir(from_, context.pkgsrc):
             raise Exception("Package tried to copy from directory outside its own")

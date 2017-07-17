@@ -210,7 +210,8 @@ def make_full_graph():
                     continue
 
                 G.add_edge(package, dep)
-        for package in nx.topological_sort(G):
+        order = sorted(local_repo.get_all_packages(), key=lambda x: x.priority)
+        for package in nx.topological_sort(G, order):
             print("+" + package.name, file=f)
         print("*Unmanaged: Dawnguard", file=f)
         print("*Unmanaged: Dragonborn", file=f)

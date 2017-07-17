@@ -31,5 +31,11 @@ class LocalLuaPackageConfigProxy(LuaPackageConfigProxy):
         return InstallReason(self.metadata["reason"])
 
     @property
+    def priority(self):
+        if "priority" not in self.metadata:
+            return 0
+        return self.metadata["priority"]
+
+    @property
     def is_local(self):
         return True

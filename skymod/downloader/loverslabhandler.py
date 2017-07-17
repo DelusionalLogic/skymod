@@ -40,7 +40,8 @@ class LoversLabHandler(Handler):
         self.initialized = False
 
     def _perform_login(self, username, password):
-        r = self.session.post("https://www.loverslab.com/index.php?app=core&module=global&section=login&do=process", data = {"ips_username": username, "ips_password": password, "rememberMe": 0, "auth_key": "880ea6a14ea49e853634fbdc5015a024"}, headers = self.headers)
+        data = {"ips_username": username, "ips_password": password, "rememberMe": 0, "auth_key": "880ea6a14ea49e853634fbdc5015a024"}
+        r = self.session.post("https://www.loverslab.com/index.php?app=core&module=global&section=login&do=process", data = data, headers = self.headers)
         if r.status_code != 200:
             raise AuthorizationError("Generic login error")
 
@@ -63,6 +64,7 @@ class LoversLabHandler(Handler):
             r = self.session.get("http://www.loverslab.com/files/getdownload/" + mod_id, allow_redirects=True, headers = self.headers, stream=True)
             if r.status_code == 200:
                 break
+            print(r.status_code)
         total_size = int(r.headers.get("content-length", 0))
         with tqdm(desc=uri, total=total_size, unit='B', unit_scale=True, miniters=1) as bar:
             with open(filename, 'wb') as fd:

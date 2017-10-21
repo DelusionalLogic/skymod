@@ -107,6 +107,10 @@ class UpgradeTransaction(AddTransaction, Expander):
         if len(new_missing) > 0:
             raise MissingDependencyError(new_missing)
 
+        # @HACK: Reset removes, since the add transaction finds all packages
+        # that are actually upgrades
+        self.removes = []
+
         self.targets = self.installs
         super().expand()
         # (expanded, missing) = super()._expand_depedencies(

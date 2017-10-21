@@ -15,62 +15,35 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from .handler import Handler
+from .authenticator.loverslab import LoversLab as LoversLabAuthenticator
 
 from urllib.parse import urlparse
 from tqdm import tqdm
-import requests
-import skymod.query as query
 
 import time
 
 from skymod.cfg import config
-from .errors import AuthorizationError
 
 
-class LoversLabHandler(Handler):
+class LoversLabHandler(Handler, LoversLabAuthenticator):
     scheme = "ll"
 
     headers = {"User-Agent": "Modbuild 0.1"}
 
     def __init__(self):
         self.cfg = config.ll
-        self.session = requests.Session()
-
-        # Do some lazy initialization to login right before needed, but only
-        # once
-        self.initialized = False
-
-    def _perform_login(self, username, password):
-        data = {
-            "ips_username": username,
-            "ips_password": password,
-            "rememberMe": 0,
-            "auth_key": "880ea6a14ea49e853634fbdc5015a024"
-        }
-        r = self.session.post(
-            "https://www.loverslab.com/index.php?app=core&module=global&section=login&do=process",  # noqa
-            data=data,
-            headers=self.headers
-        )
-        if r.status_code != 200:
-            raise AuthorizationError("Generic login error")
+        super().__init__()
 
     def fetch(self, uri, filename):
-        if not self.initialized:
-            self.initialized = True
-            if self.cfg.username == "":
-                raise Exception(
-                    "Loverlab username wasn't set."
-                    "Please set ll.username and optionally ll.password"
-                )
-            password = self.cfg.password
-            if password == "":
-                password = query.password("LoversLab password: ")
-            self._perform_login(self.cfg.username, password)
+        if not super().needs_login():
+            super().perform_login(self.cfg, self.headers)
+
+        session = super().getSession()
+
         parts = urlparse(uri)
         mod_id = parts.netloc
 
-        r = self.session.get(
+        r = session.get(
             "http://www.loverslab.com/files/getdownload/" + mod_id,
             allow_redirects=True,
             headers=self.headers
@@ -78,7 +51,7 @@ class LoversLabHandler(Handler):
         while True:
             for i in tqdm(range(0, 30), desc="Timeout", unit="Sec"):
                 time.sleep(1)
-            r = self.session.get(
+            r = session.get(
                 "http://www.loverslab.com/files/getdownload/" + mod_id,
                 allow_redirects=True,
                 headers=self.headers,

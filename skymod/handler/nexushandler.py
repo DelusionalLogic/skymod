@@ -15,72 +15,40 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from .handler import Handler
-
-from .errors import AuthorizationError
+from .sessionfactory import SessionFactory
+from .authenticator.nexus import Nexus as NexusAuthenticator
 
 from urllib.parse import urlparse
 from tqdm import tqdm
-import requests
-
-import skymod.query as query
 
 from skymod.cfg import config
 
 
-class NexusHandler(Handler):
+class NexusHandler(Handler, NexusAuthenticator):
     scheme = "nexus"
 
     headers = {"User-Agent": "Nexus Client v0.53.2"}
 
     def __init__(self):
         self.cfg = config.nexus
-        self.session = requests.Session()
-
-        self.initialized = False
-
-    def _perform_login(self, username, password):
-        r = self.session.post(
-            "http://www.nexusmods.com/skyrim/sessions/?Login",
-            params={"username": username, "password": password},
-            headers=self.headers
-        )
-        if r.status_code != 200:
-            raise AuthorizationError("Generic login error")
-
-        r = self.session.get(
-            "http://www.nexusmods.com/skyrim/Core/Libs/Flamework/Entities/User",  # noqa
-            params={"GetCredentials": ""},
-            allow_redirects=True,
-            headers=self.headers
-        )
-        if r.status_code != 200:
-            raise AuthorizationError(
-                "Failed getting credentials (How did that happen?)"
-            )
+        super().__init__()
 
     def fetch(self, uri, filename):
-        if not self.initialized:
-            self.initialized = True
-            if self.cfg.username == "":
-                raise Exception(
-                    "Nexus username wasn't set."
-                    "Please set nexus.username and optionally nexus.password"
-                )
-            password = self.cfg.password
-            if password == "":
-                password = query.password("Nexus password: ")
-            self._perform_login(self.cfg.username, password)
+        if super().needs_login():
+            super().perform_login(self.cfg, self.headers)
         parts = urlparse(uri)
         mod_id = parts.netloc
 
-        r = self.session.get(
+        session = super().getSession()
+
+        r = session.get(
             "http://www.nexusmods.com/skyrim/Files/download/" + mod_id,
             params={"game_id": "110"},
             allow_redirects=True,
             headers=self.headers
         )
         j = r.json()
-        r = self.session.get(
+        r = session.get(
             j[0]["URI"],
             allow_redirects=True,
             headers=self.headers,

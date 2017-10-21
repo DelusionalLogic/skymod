@@ -159,7 +159,7 @@ def init():
         repo_dir.makedirs()
     repo = GitRemotePackageRepo(
         repo_dir,
-        "https://github.com/DelusionalLogic/modbuild-repo.git"
+        cfg.repo.url
     )
 
     local_dir = cfg.local.dir

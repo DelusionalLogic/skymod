@@ -16,8 +16,6 @@ class SimpleHttpDownloader(SessionFactory):
         )
 
         if r.status_code != 200:
-            with open("errfile.html", "wb") as f:
-                f.write(r.content)
             raise RuntimeError(
                 "Failed downloading file due to non 200 return code. "
                 "Return code was " + str(r.status_code)

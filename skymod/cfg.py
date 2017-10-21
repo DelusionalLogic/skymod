@@ -30,6 +30,10 @@ ValueRecords = namedtuple("ValueRecords", "default, to_type")
 _options = {
         "repo": {
             "dir": ValueRecords(_home / ".modbuild/repo", Path),
+            "url": ValueRecords(
+                "https://github.com/DelusionalLogic/modbuild-repo.git",
+                str
+            )
         },
         "cache": {
             "dir": ValueRecords(_home / ".modbuild/cache",  Path),

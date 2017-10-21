@@ -42,7 +42,7 @@ from skymod.transaction import (
     UpgradeTransaction,
 )
 
-from skymod.downloader import Downloader, NexusHandler, LoversLabHandler
+from skymod.handler import Downloader, NexusHandler, LoversLabHandler
 
 from colorama import Fore, Style
 import colorama

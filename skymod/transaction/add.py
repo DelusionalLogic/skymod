@@ -44,7 +44,7 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
 
     def _sort_deps_to_targets(self):
         assert(self.state == TransactionState.INIT)
-        self.touches = nx.topological_sort(self.depend_G, reverse=True)
+        self.touches = list(reversed(list(nx.topological_sort(self.depend_G))))
         self.installs = [target for target in self.touches if not target.is_local]
 
     def expand(self):

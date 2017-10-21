@@ -32,12 +32,14 @@ from skymod.repository import Query
 from skymod.packagelist import PackageList, InstalledTag, WantedTag
 from skymod.dirhashmap import DirMap
 
-from skymod.transaction import AddTransaction, RemoveTransaction, UpgradeTransaction
 from skymod.transaction import (
     TransactionCycleError,
     DependencyBreakError,
     ConflictError,
-    MissingDependencyError
+    MissingDependencyError,
+    AddTransaction,
+    RemoveTransaction,
+    UpgradeTransaction,
 )
 
 from skymod.downloader import Downloader, NexusHandler, LoversLabHandler
@@ -167,13 +169,15 @@ def init():
 
     if cfg.mo.mods_dir == "" or not cfg.mo.mods_dir.exists():
         print(
-            "ModOrganizer2 installation directory not set. Please set mo.mods_dir"
+            "ModOrganizer2 installation directory not set. Please set "
+            "mo.mods_dir"
         )
         exit(1)
 
     if cfg.mo.profile_dir == "" or not cfg.mo.profile_dir.exists():
         print(
-            "ModOrganizer2 installation directory not set. Please set mo.profile_dir"
+            "ModOrganizer2 installation directory not set. Please set "
+            "mo.profile_dir"
         )
         exit(1)
 

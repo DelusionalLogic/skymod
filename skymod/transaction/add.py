@@ -112,7 +112,7 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
         # Lets extract the archives into hashed folder names as well. This will
         # require us to translate the paths coming out of the scripts, but so
         # be it
-        for (uri, archive_path) in files.items():
+        for uri, (archive_path, org_filename) in files.items():
             if uri in self.source_map:
                 continue
 
@@ -122,11 +122,22 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
                     "{Style.BRIGHT}{Fore.MAGENTA}{}{Style.RESET_ALL}"
                     .format(uri, Style=Style, Fore=Fore)
                 )
-                patoolib.extract_archive(
+                patoolib.util.check_existing_filename(archive_path)
+                mime, encoding = patoolib.util.guess_mime_mimedb(org_filename)
+
+                if mime in patoolib.ArchiveMimetypes:
+                    format_ = patoolib.ArchiveMimetypes[mime]
+
+                if format_ == encoding:
+                    encoding = None
+
+                patoolib._extract_archive(
                     archive_path,
                     outdir=unpack_dir,
                     interactive=False,
-                    verbosity=-1
+                    verbosity=-1,
+                    format=format_,
+                    compression=encoding,
                 )
 
         # Populate the package_files list with the operations to complete

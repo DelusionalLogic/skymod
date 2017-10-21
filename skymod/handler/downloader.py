@@ -33,14 +33,14 @@ class Downloader(object):
         # Is the uri cached
         if uri in self.cache:
             tqdm.write("{} found in cache".format(uri))
-            return self.cache.get(uri) / "file"
+            return (self.cache.get(uri) / "file", filename)
 
         with self.cache.atomic_add(uri) as dl_cache:
             for handler in self.handlers:
                 if handler.accept(uri):
                     handler.fetch(uri, dl_cache / "file")
 
-        return self.cache.get(uri) / "file"
+        return (self.cache.get(uri) / "file", filename)
 
     def fetch(self, entries):
         files = {}

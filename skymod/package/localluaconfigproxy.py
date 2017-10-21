@@ -17,6 +17,7 @@
 from .luaconfigproxy import LuaPackageConfigProxy
 from .install_reason import InstallReason
 
+
 class LocalLuaPackageConfigProxy(LuaPackageConfigProxy):
     def __init__(self, path, config, pkgsrc, pkgins, metadata):
         super().__init__(path, config, pkgsrc, pkgins)
@@ -39,3 +40,6 @@ class LocalLuaPackageConfigProxy(LuaPackageConfigProxy):
     @property
     def is_local(self):
         return True
+
+    def __lt__(self, other):
+        return self.priority < other.priority

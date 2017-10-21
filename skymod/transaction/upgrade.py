@@ -80,6 +80,12 @@ class UpgradeTransaction(AddTransaction, Expander):
             print("Checking {}".format(package))
             dependants = self.local_repo.find_dependants(package)
             for dependant in dependants:
+
+                # If the dependant is queued for removal we don't really care
+                # if we are going to break dependencies
+                if dependant in self.removes:
+                    continue
+
                 for dep_str in dependant.dependecies:
                     q = Query(dep_str)
                     # If it didn't match before then we don't care

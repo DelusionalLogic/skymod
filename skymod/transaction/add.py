@@ -16,7 +16,11 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from .transaction import Transaction
 from .state import TransactionState
-from .errors import TransactionCycleError, ConflictError, MissingDependencyError
+from .errors import (
+    TransactionCycleError,
+    ConflictError,
+    MissingDependencyError,
+)
 from .conflictfinder import ConflictFinder
 from .expander import Expander
 
@@ -45,7 +49,9 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
     def _sort_deps_to_targets(self):
         assert(self.state == TransactionState.INIT)
         self.touches = list(reversed(list(nx.topological_sort(self.depend_G))))
-        self.installs = [target for target in self.touches if not target.is_local]
+        self.installs = [
+            target for target in self.touches if not target.is_local
+        ]
 
     def expand(self):
         assert(self.state == TransactionState.INIT)
@@ -73,7 +79,8 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
         # Find all the packages that are upgrades rather than installs
         for package in expanded:
             if not package.is_local:
-                # Search for just the name to check if we have any version locally
+                # Search for just the name to check if we have any version
+                # locally
                 q = Query(package.name)
                 local_package = self.local_repo.find_package(q)
                 # If we have something we want to remove it first, we call that
@@ -97,7 +104,7 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
         for t in self.installs:
             print("Collecting sources from {}".format(t.name))
             for s in t.sources:
-                fetches.add( (s.uri, s.filename) )
+                fetches.add((s.uri, s.filename))
 
         # Actually do the downloads
         files = self.downloader.fetch(fetches)
@@ -110,8 +117,17 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
                 continue
 
             with self.source_map.atomic_add(uri) as unpack_dir:
-                print("Extracting {Style.BRIGHT}{Fore.MAGENTA}{}{Style.RESET_ALL}".format(uri, Style=Style, Fore=Fore))
-                patoolib.extract_archive(archive_path, outdir=unpack_dir, interactive=False, verbosity=-1)
+                print(
+                    "Extracting "
+                    "{Style.BRIGHT}{Fore.MAGENTA}{}{Style.RESET_ALL}"
+                    .format(uri, Style=Style, Fore=Fore)
+                )
+                patoolib.extract_archive(
+                    archive_path,
+                    outdir=unpack_dir,
+                    interactive=False,
+                    verbosity=-1
+                )
 
         # Populate the package_files list with the operations to complete
         for t in self.installs:
@@ -160,7 +176,8 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
                     to_dir.makedirs()
                 from_.copy(to)
 
-        # If the package isn't in the targets then we must have pulled it in as a dependency
+        # If the package isn't in the targets then we must have pulled it in as
+        # a dependency
         reason = InstallReason.DEP
         if target in self.targets:
             reason = InstallReason.REQ

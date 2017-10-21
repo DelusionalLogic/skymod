@@ -15,16 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from .handler import Handler
-from .sessionfactory import SessionFactory
 from .authenticator.nexus import Nexus as NexusAuthenticator
+from .down.simplehttp import SimpleHttpDownloader
 
 from urllib.parse import urlparse
-from tqdm import tqdm
 
 from skymod.cfg import config
 
 
-class NexusHandler(Handler, NexusAuthenticator):
+class NexusHandler(Handler, NexusAuthenticator, SimpleHttpDownloader):
     scheme = "nexus"
 
     headers = {"User-Agent": "Nexus Client v0.53.2"}
@@ -47,17 +46,7 @@ class NexusHandler(Handler, NexusAuthenticator):
             allow_redirects=True,
             headers=self.headers
         )
+        if r.status_code != 200:
+            raise RuntimeError("Failed downloading " + uri)
         j = r.json()
-        r = session.get(
-            j[0]["URI"],
-            allow_redirects=True,
-            headers=self.headers,
-            stream=True
-        )
-        total_size = int(r.headers.get("content-length", 0))
-        with tqdm(desc=uri, total=total_size, unit='B',
-                  unit_scale=True, miniters=1) as bar:
-            with open(filename, 'wb') as fd:
-                for chunk in r.iter_content(32*1024):
-                    bar.update(len(chunk))
-                    fd.write(chunk)
+        super().download_file(uri, j[0]["URI"], self.headers, filename)

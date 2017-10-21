@@ -29,6 +29,7 @@ class Downloader(object):
         self.handlers.add(handler)
 
     def fetch_file(self, uri, filename):
+        print("Fetching {}".format(filename))
         # Is the uri cached
         if uri in self.cache:
             tqdm.write("{} found in cache".format(uri))

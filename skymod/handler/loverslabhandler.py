@@ -16,6 +16,7 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from .handler import Handler
 from .authenticator.loverslab import LoversLab as LoversLabAuthenticator
+from .down.simplehttp import SimpleHttpDownloader
 
 from urllib.parse import urlparse
 from tqdm import tqdm
@@ -25,7 +26,7 @@ import time
 from skymod.cfg import config
 
 
-class LoversLabHandler(Handler, LoversLabAuthenticator):
+class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
     scheme = "ll"
 
     headers = {"User-Agent": "Modbuild 0.1"}
@@ -35,7 +36,7 @@ class LoversLabHandler(Handler, LoversLabAuthenticator):
         super().__init__()
 
     def fetch(self, uri, filename):
-        if not super().needs_login():
+        if super().needs_login():
             super().perform_login(self.cfg, self.headers)
 
         session = super().getSession()
@@ -48,22 +49,11 @@ class LoversLabHandler(Handler, LoversLabAuthenticator):
             allow_redirects=True,
             headers=self.headers
         )
-        while True:
-            for i in tqdm(range(0, 30), desc="Timeout", unit="Sec"):
-                time.sleep(1)
-            r = session.get(
-                "http://www.loverslab.com/files/getdownload/" + mod_id,
-                allow_redirects=True,
-                headers=self.headers,
-                stream=True
-            )
-            if r.status_code == 200:
-                break
-            print(r.status_code)
-        total_size = int(r.headers.get("content-length", 0))
-        with tqdm(desc=uri, total=total_size, unit='B',
-                  unit_scale=True, miniters=1) as bar:
-            with open(filename, 'wb') as fd:
-                for chunk in r.iter_content(32*1024):
-                    bar.update(len(chunk))
-                    fd.write(chunk)
+        if r.status_code != 401:
+            raise RuntimeError("Expected first request to return 401. "
+                               "Instead got " + str(r.status_code))
+
+        for i in tqdm(range(0, 30), desc=uri + " timeout", unit="Sec"):
+            time.sleep(1)
+        url = "http://www.loverslab.com/files/getdownload/" + mod_id
+        super().download_file(uri, url, self.headers, filename)

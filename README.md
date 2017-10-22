@@ -29,7 +29,7 @@ and you will be alright.
 4. Install lupa from the `lupa_wheel` directory by running `pip install
    lupa_wheel/lupa-1.4-cp36-cp36m-win_amd64.whl`. There's a different
    version in pypy, but that uses a newer version of lua.
-5. Install skymod by running `pip install ./skymod/`.
+5. Install skymod by running `pip install .`.
 6. Configure skymod as described below.
 
 Configuration

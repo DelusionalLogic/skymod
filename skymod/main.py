@@ -42,6 +42,8 @@ from skymod.transaction import (
     UpgradeTransaction,
 )
 
+from skymod.modorganizer import MO
+
 from skymod.handler import Downloader, NexusHandler, LoversLabHandler
 
 from colorama import Fore, Style
@@ -144,7 +146,7 @@ def get(name):
 
 
 def init():
-    global repo, local_repo, downloader, qs
+    global organizer, repo, local_repo, downloader, qs
 
     downloader = Downloader(down_cache)
 
@@ -154,10 +156,13 @@ def init():
     handler = LoversLabHandler()
     downloader.add_handler(handler)
 
+    organizer = MO(cfg)
+
     repo_dir = cfg.repo.dir
     if not repo_dir.exists():
         repo_dir.makedirs()
     repo = GitRemotePackageRepo(
+        organizer,
         repo_dir,
         cfg.repo.url
     )
@@ -165,21 +170,7 @@ def init():
     local_dir = cfg.local.dir
     if not local_dir.exists():
         local_dir.makedirs()
-    local_repo = LocalPackageRepo(local_dir)
-
-    if cfg.mo.mods_dir == "" or not cfg.mo.mods_dir.exists():
-        print(
-            "ModOrganizer2 installation directory not set. Please set "
-            "mo.mods_dir"
-        )
-        exit(1)
-
-    if cfg.mo.profile_dir == "" or not cfg.mo.profile_dir.exists():
-        print(
-            "ModOrganizer2 installation directory not set. Please set "
-            "mo.profile_dir"
-        )
-        exit(1)
+    local_repo = LocalPackageRepo(organizer, local_dir)
 
 
 @cli.group()
@@ -190,45 +181,6 @@ def remote():
 @cli.group()
 def local():
     init()
-
-
-# @HACK This is super hacky! we should have some template or something
-def make_full_graph():
-    import networkx as nx
-    modlist_path = cfg.mo.profile_dir / "modlist.txt"
-    with open(modlist_path, "w") as f:
-        G = nx.DiGraph()
-        for package in local_repo.get_all_packages():
-            G.add_node(package)
-            for dep_name in package.dependecies:
-                q = Query(dep_name)
-                dep = local_repo.find_package(q)
-
-                if dep is None:
-                    # Skip mising dependecies. If we have an installed package
-                    # which has a not installed dependency, then we just want
-                    # to skip it. It's up to the user to make sure everything
-                    # is resolved, of course assisted by the tool.
-                    # @COMPLETE it might be useful give the user some way of
-                    # doing a full dependency verification of the local repo
-                    continue
-
-                G.add_edge(package, dep)
-        for package in nx.lexicographical_topological_sort(
-                G,
-                key=lambda x: x.priority):
-            print("+" + package.name, file=f)
-        print("*Unmanaged: Dawnguard", file=f)
-        print("*Unmanaged: Dragonborn", file=f)
-        print("*Unmanaged: HearthFires", file=f)
-        print("*Unmanaged: HighResTexturePack01", file=f)
-        print("*Unmanaged: HighResTexturePack02", file=f)
-        print("*Unmanaged: HighResTexturePack03", file=f)
-        print("*Unmanaged: Unofficial Dawnguard Patch", file=f)
-        print("*Unmanaged: Unofficial Dragonborn Patch", file=f)
-        print("*Unmanaged: Unofficial Hearthfire Patch", file=f)
-        print("*Unmanaged: Unofficial High Resolution Patch", file=f)
-        print("*Unmanaged: Unofficial Skyrim Patch", file=f)
 
 
 @remote.command()
@@ -258,9 +210,6 @@ def install(packages, explicit, upgrade):
     for e_path in explicit:
         # @HACK this should be a config option and also maybe not specified
         # here?
-        pkgins = cfg.mo.mods_dir
-        if not pkgins.exists():
-            pkgins.mkdir()
         pkgsrc = cfg.source.dir
         e = Path(e_path)
         if not e.exists():
@@ -274,7 +223,7 @@ def install(packages, explicit, upgrade):
                 )
             )
             exit(1)
-        package = load_package(e, pkgsrc, pkgins)
+        package = load_package(e, pkgsrc, organizer.getModsDir())
         t.add(package)
 
     for q in qs:
@@ -350,7 +299,7 @@ def install(packages, explicit, upgrade):
 
     t.prepare()
     t.commit()
-    make_full_graph()
+    organizer.make_profile(local_repo)
 
 
 @local.command()
@@ -471,7 +420,7 @@ def remove(packages, no_dep):
             exit(1)
 
     t.commit()
-    make_full_graph()
+    organizer.make_profile(local_repo)
 
 
 @remote.command()

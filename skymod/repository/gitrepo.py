@@ -36,7 +36,7 @@ class TqdmUpTo(tqdm):
 
 
 class GitRemotePackageRepo(PackageRepo):
-    def __init__(self, root, remote):
+    def __init__(self, organizer, root, remote):
         if not root.exists() or not (root/".git").exists():
             print("Cloning repo")
             with TqdmUpTo(miniters=1) as bar:
@@ -48,7 +48,7 @@ class GitRemotePackageRepo(PackageRepo):
         else:
             self.repo = git.Repo(root)
         self.remote = self.repo.remote()
-        super().__init__(root)
+        super().__init__(organizer, root)
 
     def update(self):
         with TqdmUpTo(miniters=1, total=100) as bar:

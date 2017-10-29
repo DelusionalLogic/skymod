@@ -23,15 +23,14 @@ from datetime import datetime
 from skymod.cfg import config as cfg
 
 import yaml
-from path import Path
 
 
 class LocalPackageRepo(PackageRepo):
-    def __init__(self, root):
-        super().__init__(root)
+    def __init__(self, organizer, root):
+        super().__init__(organizer, root)
 
     def _load_package(self, path):
-        pkgins = cfg.mo.mods_dir
+        pkgins = self.organizer.getModsDir()
         pkgsrc = cfg.source.dir
 
         config = skymod.package.load_local_package(

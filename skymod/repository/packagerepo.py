@@ -15,22 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 import skymod.package
-from .query import Mod
 from .query import Query
 
 from skymod.cfg import config as cfg
 
-from colorama import Fore, Style
-from path import Path
-
 from fuzzywuzzy import process
 
+
 class PackageRepo(object):
-    def __init__(self, root):
+    def __init__(self, organizer, root):
         self.root = root
+        self.organizer = organizer
 
     def _load_package(self, path):
-        pkgins = cfg.mo.mods_dir
+        pkgins = self.organizer.getModsDir()
         pkgsrc = cfg.source.dir
         config = skymod.package.load_package(
             path / "modbuild.lua", pkgsrc, pkgins
@@ -78,7 +76,7 @@ class PackageRepo(object):
                     terms,
                     self._all_packages(),
                     score_cutoff=10,
-                    limit = 10
+                    limit=10
                 )
         ]
 

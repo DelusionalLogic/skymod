@@ -198,13 +198,20 @@ def sync():
     help="Explicit package descriptor files to include"
 )
 @click.option('--upgrade/--no-upgrade', default=False)
-def install(packages, explicit, upgrade):
+@click.option('--as-deps', 'reason', flag_value=InstallReason.DEP)
+@click.option(
+    '--as-target',
+    'reason',
+    flag_value=InstallReason.REQ,
+    default=True
+)
+def install(packages, explicit, upgrade, reason):
     # Create the queries from the strings
     qs = [Query(p) for p in packages]
     if upgrade:
         t = UpgradeTransaction(local_repo, repo, downloader)
     else:
-        t = AddTransaction(local_repo, repo, downloader, src_cache)
+        t = AddTransaction(local_repo, repo, downloader, reason, src_cache)
 
     # Support for loading out of tree package specifications
     for e_path in explicit:

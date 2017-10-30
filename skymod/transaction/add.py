@@ -41,10 +41,11 @@ from skymod.repository import Query
 
 
 class AddTransaction(Transaction, ConflictFinder, Expander):
-    def __init__(self, installed, repo, downloader, cache=None):
+    def __init__(self, installed, repo, downloader, reason, cache=None):
         super().__init__(installed, repo, downloader)
         self.source_map = cache or DirMap(cfg.source.dir)
         self.removes = []
+        self.reason = reason
 
     def _sort_deps_to_targets(self):
         assert(self.state == TransactionState.INIT)
@@ -191,7 +192,9 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
         # a dependency
         reason = InstallReason.DEP
         if target in self.targets:
-            reason = InstallReason.REQ
+            # If it's an explicit requirement we want to use the reason
+            # provided by the instantiator
+            reason = self.reason
 
         self.local_repo.add_package(reason, target)
         pass

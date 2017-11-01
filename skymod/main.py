@@ -482,6 +482,29 @@ def local_search(term, reverse):
 
     lst.present()
 
+@local.command("list")
+@click.option(
+    '-w',
+    '--wanted',
+    is_flag=True,
+    help="Only list wanted"
+)
+def local_list(wanted):
+    candidates = local_repo.get_all_packages()
+    if wanted:
+        candidates = [x for x in candidates if x.reason == InstallReason.REQ]
+
+    lst = PackageList(candidates)
+    for package in lst:
+        # We dont tag installed packages, since we already print the local
+        # version information
+
+        # Lets tag explicitly installed packages
+        if package.reason == InstallReason.REQ:
+            lst.add_tag(package, WantedTag())
+
+    lst.present()
+
 
 # @ENHANCEMENT It would be great it you could visualize as part of the other
 # operations

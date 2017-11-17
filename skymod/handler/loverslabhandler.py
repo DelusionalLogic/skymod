@@ -20,6 +20,7 @@ from .down.simplehttp import SimpleHttpDownloader
 
 from urllib.parse import urlparse
 from tqdm import tqdm
+from bs4 import BeautifulSoup as soup
 
 import time
 
@@ -42,18 +43,31 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
         session = super().getSession()
 
         parts = urlparse(uri)
-        mod_id = parts.netloc
 
+        #Get CSRF token
         r = session.get(
-            "http://www.loverslab.com/files/getdownload/" + mod_id,
+            f"https://www.loverslab.com/files/file/{parts.netloc}",
             allow_redirects=True,
             headers=self.headers
         )
-        if r.status_code != 401:
-            raise RuntimeError("Expected first request to return 401. "
+        s = soup(r.content, "lxml")
+
+        signoutTag = s.find("ul", id="elUserLink_menu").find("li", attrs={"data-menuitem": "signout"}).find("a")
+        signoutUrl = signoutTag["href"]
+        csrfToken = urlparse(signoutUrl).query[8:]
+
+        mod_id = f"{parts.netloc}?{parts.query}"
+
+        r = session.get(
+            f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}",
+            allow_redirects=True,
+            headers=self.headers
+        )
+        if r.status_code != 200:
+            raise RuntimeError("Expected first request to return 200. "
                                "Instead got " + str(r.status_code))
 
-        for i in tqdm(range(0, 30), desc=uri + " timeout", unit="Sec"):
+        for i in tqdm(range(0, 11), desc=uri + " timeout", unit="Sec"):
             time.sleep(1)
-        url = "http://www.loverslab.com/files/getdownload/" + mod_id
+        url = f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}"
         super().download_file(uri, url, self.headers, filename)

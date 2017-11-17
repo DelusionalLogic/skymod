@@ -18,6 +18,7 @@ from ..sessionfactory import SessionFactory
 from ..errors import AuthorizationError
 
 import skymod.query as query
+from bs4 import BeautifulSoup as soup
 
 
 class LoversLab(SessionFactory):
@@ -45,14 +46,25 @@ class LoversLab(SessionFactory):
 
         session = super().getSession()
 
+        # Get CSRF token
+        r = session.get("https://www.loverslab.com/")
+        s = soup(r.content, "lxml")
+
+        formTag = s.find("div", attrs={"data-role": "loginForm"})
+        csrfTag = formTag.find("input", attrs={"name": "csrfKey"})
+        csrfToken = csrfTag["value"]
+
         data = {
-            "ips_username": username,
-            "ips_password": password,
-            "rememberMe": 0,
-            "auth_key": "880ea6a14ea49e853634fbdc5015a024"
+            "login__standard_submitted": 1,
+            "auth": username,
+            "password": password,
+            "remember_me": 0,
+            "remember_me_checkbox": 0,
+            "signin_anonumouns": 1,
+            "csrfKey": csrfToken,
         }
         r = session.post(
-            "https://www.loverslab.com/index.php?app=core&module=global&section=login&do=process",  # noqa
+            "https://www.loverslab.com/login/",
             data=data,
             headers=headers
         )

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='skymod',
-    version='0.4',
+    version='0.5',
     description='A packagemanager for skyrim mods',
     url='https://github.com/DelusionalLogic/skymod',
     author='Delusional Logic',
@@ -23,6 +23,7 @@ setup(
         "GitPython",
         "path.py",
         "PyYAML",
+        "beautifulsoup4"
     ],
     entry_points='''
         [console_scripts]

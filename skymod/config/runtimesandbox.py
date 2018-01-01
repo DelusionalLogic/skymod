@@ -40,9 +40,14 @@ def install(context, from_str, to_str=""):
     if from_.isabs():
         raise Exception("From glob is not allowed to be absolute")
 
-    from_ = context.source_lookup.translate(from_)
+    from_trans_ = context.source_lookup.translate(from_)
 
-    for d in Path().glob(from_):
+    dirs = Path().glob(from_trans_)
+
+    if not dirs:
+        raise Exception(f"File or directory not found: {from_}")
+
+    for d in dirs:
         from_ = d
         if not is_subdir(from_, context.pkgsrc):
             raise Exception("Package tried to copy from directory outside its own")
@@ -81,19 +86,9 @@ class RuntimeSandbox(object):
 
         self.sandboxFile = lua.eval("""
         function(path, env)
-            local f = io.open(path, "rb")
-            if f == nil then
-                print("failed opening file: ", path)
-                f:close()
-                error()
-            end
-            if f:read(1) == 27 then return nil, "binary bytecode prohibited" end
-            f:close()
-
-            local untrusted_function, message = loadfile(path)
+            local untrusted_function, message = loadfile(path, "t", env)
             if not untrusted_function then return nil, message end
 
-            setfenv(untrusted_function, env)
             return untrusted_function()
         end
         """)
@@ -103,6 +98,7 @@ class RuntimeSandbox(object):
         self.setmeta(sandbox, self.sandbox_meta)
 
         context = RuntimeContext(sandbox)
+        # Inject the context as the first param
         for v in _functions:
             sandbox[v.__name__] = lambda *x, v=v: v(context, *x)
 

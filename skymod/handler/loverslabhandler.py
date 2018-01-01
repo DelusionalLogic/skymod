@@ -67,7 +67,7 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
             raise RuntimeError("Expected first request to return 200. "
                                "Instead got " + str(r.status_code))
 
-        for i in tqdm(range(0, 11), desc=uri + " timeout", unit="Sec"):
+        for i in tqdm(range(0, 11), desc=filename + " timeout", unit="Sec"):
             time.sleep(1)
         url = f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}"
-        super().download_file(uri, url, self.headers, filename)
+        super().download_file(filename, url, self.headers, filename)

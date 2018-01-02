@@ -26,11 +26,8 @@ and you will be alright.
    installer)
 2. Download this repo from github (either clone or as a zip)
 3. Open a command prompt and navigate to the downloaded repo.
-4. Install lupa from the `lupa_wheel` directory by running `pip install
-   lupa_wheel/lupa-1.4-cp36-cp36m-win_amd64.whl`. There's a different
-   version in pypy, but that uses a newer version of lua.
-5. Install skymod by running `pip install .`.
-6. Configure skymod as described below.
+4. Install skymod by running `pip install .`.
+5. Configure skymod as described below.
 
 Configuration
 -------------
@@ -87,6 +84,17 @@ required archives into a local cache and install the package as
 specified in the modbuild file. Once the command completes the package
 should be installed and ready to use.
 
+At some point in the future you might want to update your installed
+packages, this is done by running
+
+    skymod remote sync
+    
+To sync the package repo, followed by
+
+    skymod remote install --upgrade
+    
+To upgrade all installed packages.
+
 As you installed packages grows skymod will continuously make sure that
 new packages you install don't conflict with any of the ones already
 installed.
@@ -100,9 +108,9 @@ follows the format:
     <PACKAGE_NAME>[<VER_MOD><VERSION>]
 
 `PACKAGE_NAME` is just the name of the package. `VER_MOD` is a modifier
-to the following version of the package, it can be one of: `>`, `<`,
-`>=`, `<=` or `=`. `VERSION` is a version specifier as described in the
-packaging section below.
+to the version of the package, it can be one of: `>`, `<`, `>=`, `<=`
+or `=`. `VERSION` is a version specifier as described in the packaging
+section below.
 
 Query strings are understood as they are read. This means that a query
 string written as: `cbbe>=1.0` means a version of the package named
@@ -128,9 +136,9 @@ If the cache it too large, skymod also supports cleaning the cache.
 
 Packaging
 ---------
-skymod is based on the Arch Linux Package Manager (ALPM) and the AUR. As
-such it should be immediately familiar to anyone who has used Arch Linux
-in the past.
+skymod is inspired by the Arch Linux Package Manager (ALPM) and the AUR.
+As such it should be immediately familiar to anyone who has used Arch
+Linux in the past.
 
 The modbuild files are distributed as a single git repo, which skymod
 will automatically clone when first run. This git repo has a folder for
@@ -146,18 +154,18 @@ follows:
 ```
     name: The name of the package
     version: A version specifier, which is any numbers separated by .'s.
-        Letters and special characters are NOT supported. Generally the
-        version specifier follows the SemVer format, but allows for any
-        number of parts.
-	desc: A short description of the package. Please keep it shorter
-		than 80 characters. The best descriptions continues the sentence
-		"This mod is a ..." without including it.
+        Letters and special characters are NOT supported. The version
+        specifier follow a subset of the SemVer semantics, but with
+        arbitrarily many parts.
+    desc: A short description of the package. Please keep it shorter
+        than 80 characters. The best descriptions continues the sentence
+        "This mod is a ..." without including it.
     depends: A list of packages this package depends on, formatted as
         query strings.
     provides: A list of package this package can be used as a standin
-        For. This is very useful for mods that have a compatible API as
-        Another mod. It's also very useful for providing alternatives
-        within a package, while requiring that one of them be installed.
+        For. This is very useful for mods that have a compatible API.
+        It's also very useful for providing alternatives within a package,
+        while requiring that one of them be installed.
     conflicts: A list of packages that this package are known to not
         work with, formatted as query strings. Keep in mind that other
         packages might bridge this conflict, allowing otherwise
@@ -180,15 +188,14 @@ follows:
 
 Sources
 -------
-The list of sources is special. Generically it follows the format
-`<URI>::<NAME>`. The `NAME` is the name of the downloaded file, which
-will be unpacked into a directory of the same name with the extension
-removed.
+The list of sources is special. It follows the format `<URI>::<NAME>`.
+The `NAME` is the name of the downloaded file, which will be unpacked
+into a directory of the same name with the extension removed.
 
 `URI` is more interesting. A URI to download from the nexus looks starts
 with the `nexus://` protocol, and has the location of the nexus file id.
 For the nexus download url `http://www.nexusmods.com/skyrim/download/1000248470`
 the source `URI` would be `nexus://1000248470/`. Loverslab urls use the
 `ll` protocol, and the location is the last part of the download url.
-The download `http://www.loverslab.com/files/getdownload/572358-xp32-maximum-skeleton-extended-xpmse/`
-becomes `ll://572358-xp32-maximum-skeleton-extended-xpmse/`.
+The download `https://www.loverslab.com/files/file/676-xp32-maximum-skeleton-extended-xpmse/?do=download&r=645603&confirm=1&t=1&csrfKey=5d722ab8c840efe3c4822fc267aa6a59`
+becomes `ll://676-xp32-maximum-skeleton-extended-xpmse/?do=download&r=645603&confirm=1&t=1`.

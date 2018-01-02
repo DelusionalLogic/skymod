@@ -19,11 +19,12 @@ from .expander import Expander
 from .errors import MissingDependencyError
 
 from skymod.repository import Query
+from skymod.package import InstallReason
 
 
 class UpgradeTransaction(AddTransaction, Expander):
     def __init__(self, installed, repo, downloader):
-        super().__init__(installed, repo, downloader)
+        super().__init__(installed, repo, downloader, InstallReason.REQ)
 
     def _find_package_upgrade(self, package):
         # Ignore any package that is already in the targets array, regardless
@@ -43,6 +44,9 @@ class UpgradeTransaction(AddTransaction, Expander):
             assert(package.is_local)
             q = Query(package.name)
             remote_package = self.repo.find_literal(q)
+            if remote_package is None:
+                print("No remote package for {}".format(package))
+                continue
             if remote_package.version > package.version:
                 upgrade.add((package, remote_package))
         return upgrade
@@ -56,8 +60,8 @@ class UpgradeTransaction(AddTransaction, Expander):
 
         upgrades = self._find_upgrade_required(self.targets)
         self.removes = [u[0] for u in upgrades]
-        self.targets = self.removes
         self.installs = [u[1] for u in upgrades]
+        self.targets = [u[1] for u in upgrades if u[0].reason == InstallReason.REQ]
 
         # So the dependencies might have changed. I don't think we want to
         # remove unused dependencies, but we do want to pull in new ones. We

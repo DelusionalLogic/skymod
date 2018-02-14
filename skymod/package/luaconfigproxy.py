@@ -48,8 +48,8 @@ class LuaPackageConfigProxy(object):
         return [self.config.env.depends[i] for i in self.config.env.depends]
 
     def package(self, source_lookup):
-        # Assign it to the context, because we don't really want to the lua
-        # code to know anything about his
+        # Assign it to the context, because we don't really want the lua code
+        # to know anything about his
         self.config.source_lookup = source_lookup
         return self.config.env.package()
 

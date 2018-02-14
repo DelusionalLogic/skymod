@@ -183,6 +183,76 @@ def local():
     init()
 
 
+# Allow anyone to check if the sources of a package (or number of packages) is
+# still valid. This will do a fast check instead of actually downloading the
+# package. A useful feature of the current setup is that we can check all
+# packages by giving no params. That way we can easily check that all sources
+# in the repo are valid.
+#
+# There's more checking that could be done, like verifying that the names of
+# all packages match the directory they reside in, but that's left till later.
+# We could also check things like description length and if dependencies exist.
+# All of these are interesting. -Jesper 14/02-2018
+@cli.command()
+@click.argument("packages", nargs=-1)
+def check(packages):
+    init()
+
+    if packages:
+        qs = [Query(p) for p in packages]
+        packages = []
+        for q in qs:
+            package = repo.find_package(q)
+            if package is None:
+                print("No package named "
+                      "{Style.BRIGHT}{}{Style.RESET_ALL}".format(
+                          q,
+                          Style=Style
+                      ))
+                return
+            packages.append(package)
+    else:
+        # A bit hacky, but this is a debug command, so i'm not too worried.
+        packages = [repo._load_package(p) for p in repo._all_packages()]
+
+    owners = {}
+    fetches = set()
+    for package in packages:
+        print("Collecting sources from {}".format(package.name))
+        for s in package.sources:
+            # We need the owners to report who requested a download later
+            if s.uri not in owners:
+                owners[s.uri] = []
+            owners[s.uri].append(package)
+
+            fetches.add((s.uri))
+    # Actually do the check, this should use some fast method in the individual
+    # handlers
+    checked = downloader.check(fetches)
+
+    anyFail = False
+    for (uri, result) in checked.items():
+        # Only report if something went wrong
+        if not result:
+            print("Failed checking uri "
+                  "{Style.BRIGHT}{Fore.RED}{}{Style.RESET_ALL} "
+                  "requested by:".format(
+                      uri,
+                      Style=Style,
+                      Fore=Fore
+                  ))
+            # Print the packages that depend on the download, helps find the
+            # culprit in large checks
+            for package in owners[uri]:
+                print(f"\t{package.name}")
+            anyFail = True
+
+    # If everything went well let's just print something to instill some
+    # confidence
+    if not anyFail:
+        print("Everything was good")
+
+
 @remote.command()
 def sync():
     print("Syncing remote repo")

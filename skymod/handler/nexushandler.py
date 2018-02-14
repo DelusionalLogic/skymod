@@ -50,3 +50,24 @@ class NexusHandler(Handler, NexusAuthenticator, SimpleHttpDownloader):
             raise RuntimeError("Failed downloading " + uri)
         j = r.json()
         super().download_file(uri, j[0]["URI"], self.headers, filename)
+
+    def check(self, uri):
+        if super().needs_login():
+            super().perform_login(self.cfg, self.headers)
+        parts = urlparse(uri)
+        mod_id = parts.netloc
+
+        session = super().getSession()
+
+        r = session.get(
+            "http://www.nexusmods.com/skyrim/Files/download/" + mod_id,
+            params={"game_id": "110"},
+            allow_redirects=True,
+            headers=self.headers
+        )
+        if r.status_code != 200:
+            raise RuntimeError("Failed requesting " + uri)
+        if r.content != b"null":
+            return True
+
+        return False

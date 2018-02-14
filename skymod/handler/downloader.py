@@ -42,8 +42,22 @@ class Downloader(object):
 
         return (self.cache.get(uri) / "file", filename)
 
+    def check_file(self, uri):
+        for handler in self.handlers:
+            if handler.accept(uri):
+                if handler.check(uri):
+                    return True
+
+        return False
+
     def fetch(self, entries):
         files = {}
         for (uri, filename) in entries:
             files[uri] = self.fetch_file(uri, filename)
+        return files
+
+    def check(self, entries):
+        files = {}
+        for uri in tqdm(entries, desc="Checking"):
+            files[uri] = self.check_file(uri)
         return files

@@ -81,7 +81,6 @@ class UpgradeTransaction(AddTransaction, Expander):
         new_missing = set()
 
         for package in self.removes:
-            print("Checking {}".format(package))
             dependants = self.local_repo.find_dependants(package)
             for dependant in dependants:
 

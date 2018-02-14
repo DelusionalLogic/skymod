@@ -193,7 +193,8 @@ class AddTransaction(Transaction, ConflictFinder, Expander):
         reason = InstallReason.DEP
         if target in self.targets:
             # If it's an explicit requirement we want to use the reason
-            # provided by the instantiator
+            # provided by the instantiator, since the dependency of
+            # a dependency is also a dependency
             reason = self.reason
 
         self.local_repo.add_package(reason, target)

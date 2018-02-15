@@ -15,7 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 import sys
-from colorama import Style, Fore
+
+from colorama import Fore, Style
+
 
 def yes_no(question, default="yes"):
     """Ask a yes/no question via input() and return their answer.

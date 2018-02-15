@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .add import AddTransaction
-from .expander import Expander
-from .errors import MissingDependencyError
-
-from skymod.repository import Query
 from skymod.package import InstallReason
+from skymod.repository import Query
+
+from .add import AddTransaction
+from .errors import MissingDependencyError
+from .expander import Expander
 
 
 class UpgradeTransaction(AddTransaction, Expander):

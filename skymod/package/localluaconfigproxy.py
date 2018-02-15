@@ -14,8 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .luaconfigproxy import LuaPackageConfigProxy
 from .install_reason import InstallReason
+from .luaconfigproxy import LuaPackageConfigProxy
 
 
 class LocalLuaPackageConfigProxy(LuaPackageConfigProxy):

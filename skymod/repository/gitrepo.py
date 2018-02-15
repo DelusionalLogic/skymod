@@ -14,9 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .packagerepo import PackageRepo
 import git
 from tqdm import tqdm
+
+from .packagerepo import PackageRepo
 
 
 class TqdmUpTo(tqdm):

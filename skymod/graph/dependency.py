@@ -15,10 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 import networkx as nx
+from networkx.algorithms.approximation.connectivity import (
+    local_node_connectivity
+)
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
-from networkx.algorithms.approximation.connectivity import local_node_connectivity
 
 import query as Q
+
 
 #@ENHANCE: Right now the strategy is baked into the solver. Maybe pull that out
 class DependencySolver(object):
@@ -98,4 +101,3 @@ class DependencyGraph(object):
 
     def __iter__(self):
         return self.G.__iter__()
-

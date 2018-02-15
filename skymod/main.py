@@ -15,39 +15,38 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 import click
-from path import Path
-import skymod.query as Q
+import colorama
 import humanize
+from colorama import Fore, Style
+from path import Path
 
-from .cfg import read_config
-from .cfg import config as cfg
-
-from skymod.package import load_package
-from skymod.package import InstallReason
-from skymod.package import print_local_package
-
-from skymod.repository import GitRemotePackageRepo
-from skymod.repository import LocalPackageRepo
-from skymod.repository import Query
-from skymod.packagelist import PackageList, InstalledTag, WantedTag
+import skymod.query as Q
 from skymod.dirhashmap import DirMap
-
+from skymod.handler import Downloader, LoversLabHandler, NexusHandler
+from skymod.modorganizer import MO
+from skymod.package import (
+    InstallReason,
+    load_package,
+    print_local_package
+)
+from skymod.packagelist import InstalledTag, PackageList, WantedTag
+from skymod.repository import (
+    GitRemotePackageRepo,
+    LocalPackageRepo,
+    Query
+)
 from skymod.transaction import (
-    TransactionCycleError,
-    DependencyBreakError,
-    ConflictError,
-    MissingDependencyError,
     AddTransaction,
+    ConflictError,
+    DependencyBreakError,
+    MissingDependencyError,
     RemoveTransaction,
-    UpgradeTransaction,
+    TransactionCycleError,
+    UpgradeTransaction
 )
 
-from skymod.modorganizer import MO
-
-from skymod.handler import Downloader, NexusHandler, LoversLabHandler
-
-from colorama import Fore, Style
-import colorama
+from .cfg import config as cfg
+from .cfg import read_config
 
 colorama.init()
 
@@ -551,6 +550,7 @@ def local_search(term, reverse):
             lst.add_tag(package, WantedTag())
 
     lst.present()
+
 
 @local.command("list")
 @click.option(

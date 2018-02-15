@@ -14,10 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from skymod.package import Version
-
-from enum import Enum
 import re
+from enum import Enum
+
+from skymod.package import Version
 
 query_re = re.compile("(?P<name>[a-zA-Z0-9-_]{2,})(?:(?P<compar>[<>]=?|=)(?P<version>[0-9.]+))?$")
 
@@ -82,4 +82,3 @@ class Query(object):
 
     def __repr__(self):
         return "{}{}{}".format(self.name, self.mod.value or "", self.version or "")
-

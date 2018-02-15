@@ -14,11 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from ..sessionfactory import SessionFactory
-from ..errors import AuthorizationError
+from bs4 import BeautifulSoup as soup
 
 import skymod.query as query
-from bs4 import BeautifulSoup as soup
+
+from ..errors import AuthorizationError
+from ..sessionfactory import SessionFactory
 
 
 class LoversLab(SessionFactory):

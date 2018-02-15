@@ -14,9 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-import skymod.repository
-from .install_reason import InstallReason
 from colorama import Style
+
+import skymod.repository
+
+from .install_reason import InstallReason
 
 
 def print_local_package(local_repo, package):

@@ -16,6 +16,7 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from urllib.parse import urlparse
 
+
 class Handler(object):
     def accept(self, uri):
         return self.scheme == urlparse(uri).scheme

@@ -14,15 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .packagerepo import PackageRepo
-from .errors import AlreadyInstalledError
-import skymod.package
-
 from datetime import datetime
 
+import yaml
+
+import skymod.package
 from skymod.cfg import config as cfg
 
-import yaml
+from .errors import AlreadyInstalledError
+from .packagerepo import PackageRepo
 
 
 class LocalPackageRepo(PackageRepo):

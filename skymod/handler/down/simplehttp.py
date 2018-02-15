@@ -14,9 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from ..sessionfactory import SessionFactory
-
 from tqdm import tqdm
+
+from ..sessionfactory import SessionFactory
 
 
 class SimpleHttpDownloader(SessionFactory):

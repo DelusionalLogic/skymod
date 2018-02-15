@@ -33,4 +33,3 @@ class ConflictError(Exception):
     def __init__(self, conflicts):
         self.conflicts = conflicts
         super().__init__()
-

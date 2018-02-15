@@ -15,8 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 import networkx as nx
+from networkx.algorithms.approximation.connectivity import (
+    local_node_connectivity
+)
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
-from networkx.algorithms.approximation.connectivity import local_node_connectivity
+
 
 class RootNode(object):
     def __init__(self):

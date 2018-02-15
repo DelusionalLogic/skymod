@@ -14,10 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from ..sessionfactory import SessionFactory
-from ..errors import AuthorizationError
-
 import skymod.query as query
+
+from ..errors import AuthorizationError
+from ..sessionfactory import SessionFactory
 
 
 class Nexus(SessionFactory):

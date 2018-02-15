@@ -14,13 +14,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .handler import Handler
-from .authenticator.nexus import Nexus as NexusAuthenticator
-from .down.simplehttp import SimpleHttpDownloader
-
 from urllib.parse import urlparse
 
 from skymod.cfg import config
+
+from .authenticator.nexus import Nexus as NexusAuthenticator
+from .down.simplehttp import SimpleHttpDownloader
+from .handler import Handler
 
 
 class NexusHandler(Handler, NexusAuthenticator, SimpleHttpDownloader):

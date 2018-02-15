@@ -16,6 +16,7 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from .handler import Handler
 
+
 class StubHandler(Handler):
     def __init__(self, scheme, message):
         self.scheme = scheme

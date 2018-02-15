@@ -14,11 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from skymod.repository import Query
+import networkx as nx
 
 import skymod.query as Q
-
-import networkx as nx
+from skymod.repository import Query
 
 
 class Expander(object):

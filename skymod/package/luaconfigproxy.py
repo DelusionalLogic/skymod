@@ -14,8 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .version import Version
 from .sourceline import SourceLine
+from .version import Version
 
 
 class LuaPackageConfigProxy(object):
@@ -136,4 +136,3 @@ class LuaPackageConfigProxy(object):
 
     def __hash__(self):
         return self.name.__hash__()
-

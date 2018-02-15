@@ -16,6 +16,7 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from functools import total_ordering
 
+
 @total_ordering
 class Version(object):
     def __init__(self, version_str):
@@ -43,4 +44,3 @@ class Version(object):
 
     def __repr__(self):
         return ".".join(map(str, self.v))
-

@@ -16,6 +16,7 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from path import Path
 
+
 class SourceLine(object):
     def __init__(self, string):
         self.uri, filename = string.split("::")

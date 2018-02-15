@@ -14,11 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from path import Path
-from configparser import SafeConfigParser
 from collections import namedtuple
-
+from configparser import SafeConfigParser
 from os.path import expanduser
+
+from path import Path
+
 _home = Path(expanduser("~"))
 
 

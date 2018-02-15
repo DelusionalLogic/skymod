@@ -16,6 +16,7 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from enum import Enum
 
+
 class InstallReason(Enum):
     DEP = 1,
     REQ = 2,

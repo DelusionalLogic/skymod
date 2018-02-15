@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-import skymod.package
-from .query import Query
+from fuzzywuzzy import process
 
+import skymod.package
 from skymod.cfg import config as cfg
 
-from fuzzywuzzy import process
+from .query import Query
 
 
 class PackageRepo(object):
@@ -129,4 +129,3 @@ class PackageRepo(object):
         #Literal package not found, looking for a provider
         package = self._find_provider(query, exclude)
         return package
-

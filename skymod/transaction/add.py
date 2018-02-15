@@ -14,30 +14,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .transaction import Transaction
-from .state import TransactionState
-from .errors import (
-    TransactionCycleError,
-    ConflictError,
-    MissingDependencyError,
-)
-from .conflictfinder import ConflictFinder
-from .expander import Expander
-
-from skymod.package import InstallReason
 import networkx as nx
-
-from skymod.dirhashmap import DirMap
-
-from skymod.cfg import config as cfg
-
-from skymod.config.vfs import VirtualFS
-
-from colorama import Style, Fore
 import patoolib
+from colorama import Fore, Style
 from tqdm import tqdm
 
+from skymod.cfg import config as cfg
+from skymod.config.vfs import VirtualFS
+from skymod.dirhashmap import DirMap
+from skymod.package import InstallReason
 from skymod.repository import Query
+
+from .conflictfinder import ConflictFinder
+from .errors import (
+    ConflictError,
+    MissingDependencyError,
+    TransactionCycleError
+)
+from .expander import Expander
+from .state import TransactionState
+from .transaction import Transaction
 
 
 class AddTransaction(Transaction, ConflictFinder, Expander):

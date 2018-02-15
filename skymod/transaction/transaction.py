@@ -14,14 +14,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .state import TransactionState
+import patoolib
+from colorama import Fore, Style
+from path import Path
+from tqdm import tqdm
 
 from skymod.repository import Query
 
-from path import Path
-from colorama import Style, Fore
-import patoolib
-from tqdm import tqdm
+from .state import TransactionState
 
 
 class Transaction(object):

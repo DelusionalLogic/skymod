@@ -14,9 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from path import Path
-from lupa import LuaRuntime
 from distutils.dir_util import copy_tree
+
+from lupa import LuaRuntime
+from path import Path
 
 lua = LuaRuntime()
 

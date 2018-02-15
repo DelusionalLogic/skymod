@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .transaction import Transaction
-from .state import TransactionState
-from .errors import DependencyBreakError, ConflictError
-
-from skymod.repository import Query
 from skymod.package import InstallReason
+from skymod.repository import Query
+
+from .errors import ConflictError, DependencyBreakError
+from .state import TransactionState
+from .transaction import Transaction
 
 
 # To remove a package we just delete the pkgins and remove the package from the

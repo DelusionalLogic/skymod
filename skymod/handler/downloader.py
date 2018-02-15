@@ -15,9 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from tqdm import tqdm
-from skymod.dirhashmap import DirMap
 
 from skymod.cfg import config as cfg
+from skymod.dirhashmap import DirMap
 
 
 class Downloader(object):

@@ -14,17 +14,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from .handler import Handler
-from .authenticator.loverslab import LoversLab as LoversLabAuthenticator
-from .down.simplehttp import SimpleHttpDownloader
-
-from urllib.parse import (parse_qs, urlparse, urlencode)
-from tqdm import tqdm
-from bs4 import BeautifulSoup as soup
-
 import time
+from urllib.parse import parse_qs, urlencode, urlparse
+
+from bs4 import BeautifulSoup as soup
+from tqdm import tqdm
 
 from skymod.cfg import config
+
+from .authenticator.loverslab import LoversLab as LoversLabAuthenticator
+from .down.simplehttp import SimpleHttpDownloader
+from .handler import Handler
 
 
 class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):

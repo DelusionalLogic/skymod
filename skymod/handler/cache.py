@@ -14,8 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
-from path import Path
 import hashlib
+
+from path import Path
+
 
 class FsCache(object):
     def __init__(self, path):
@@ -37,4 +39,3 @@ class FsCache(object):
             return key_dir.files()[0]
         key_dir.mkdir()
         return key_dir / filename
-

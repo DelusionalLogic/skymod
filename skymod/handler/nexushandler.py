@@ -16,6 +16,8 @@
 # along with skymod.  If not, see <http://www.gnu.org/licenses/>.
 from urllib.parse import urlparse
 
+from requests.exceptions import ConnectionError
+
 from skymod.cfg import config
 
 from .authenticator.nexus import Nexus as NexusAuthenticator
@@ -26,7 +28,9 @@ from .handler import Handler
 class NexusHandler(Handler, NexusAuthenticator, SimpleHttpDownloader):
     scheme = "nexus"
 
-    headers = {"User-Agent": "Nexus Client v0.53.2"}
+    headers = {
+        "User-Agent":"Mod Organizer v1.2.17 (compatible with Nexus Client v0.52.3)"  # noqa
+    }
 
     def __init__(self):
         self.cfg = config.nexus
@@ -41,7 +45,7 @@ class NexusHandler(Handler, NexusAuthenticator, SimpleHttpDownloader):
         session = super().getSession()
 
         r = session.get(
-            "http://www.nexusmods.com/skyrim/Files/download/" + mod_id,
+            f"http://legacy-api.nexusmods.com/skyrim/Files/download/{mod_id}/",
             params={"game_id": "110"},
             allow_redirects=True,
             headers=self.headers
@@ -59,14 +63,18 @@ class NexusHandler(Handler, NexusAuthenticator, SimpleHttpDownloader):
 
         session = super().getSession()
 
-        r = session.get(
-            "http://www.nexusmods.com/skyrim/Files/download/" + mod_id,
-            params={"game_id": "110"},
-            allow_redirects=True,
-            headers=self.headers
-        )
+        try:
+            r = session.get(
+                "http://legacy-api.nexusmods.com/skyrim/Files/" + mod_id + "/",
+                params={"game_id": "110"},
+                allow_redirects=True,
+                headers=self.headers
+            )
+        except ConnectionError:
+            print(f"mod_id was {mod_id}")
+            raise
         if r.status_code != 200:
-            raise RuntimeError("Failed requesting " + uri)
+            return False
         if r.content != b"null":
             return True
 

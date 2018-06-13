@@ -51,17 +51,21 @@ class LoversLab(SessionFactory):
         r = session.get("https://www.loverslab.com/")
         s = soup(r.content, "lxml")
 
-        formTag = s.find("div", attrs={"data-role": "loginForm"})
+        formTag = s.find(
+            "form",
+            attrs={"data-controller": "core.global.core.login"}
+        )
         csrfTag = formTag.find("input", attrs={"name": "csrfKey"})
         csrfToken = csrfTag["value"]
 
         data = {
-            "login__standard_submitted": 1,
+            "_processLogin": [
+                "usernamepassword",
+                "usernamepassword",
+            ],
             "auth": username,
             "password": password,
-            "remember_me": 0,
-            "remember_me_checkbox": 0,
-            "signin_anonumouns": 1,
+            "anonymous": 1,
             "csrfKey": csrfToken,
         }
         r = session.post(

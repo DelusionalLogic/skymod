@@ -44,7 +44,7 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
 
         parts = urlparse(uri)
 
-        #Get CSRF token
+        # Get CSRF token
         r = session.get(
             f"https://www.loverslab.com/files/file/{parts.netloc}",
             allow_redirects=True,
@@ -52,14 +52,19 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
         )
         s = soup(r.content, "lxml")
 
-        signoutTag = s.find("ul", id="elUserLink_menu").find("li", attrs={"data-menuitem": "signout"}).find("a")
+        signoutTag = (
+            s
+            .find("ul", id="elUserLink_menu")
+            .find("li", attrs={"data-menuitem": "signout"}).find("a")
+        )
         signoutUrl = signoutTag["href"]
         csrfToken = urlparse(signoutUrl).query[8:]
 
         mod_id = f"{parts.netloc}?{parts.query}"
 
+        url = f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}"  # noqa
         r = session.get(
-            f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}",
+            url,
             allow_redirects=True,
             headers=self.headers
         )
@@ -69,7 +74,6 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
 
         for i in tqdm(range(0, 11), desc=filename + " timeout", unit="Sec"):
             time.sleep(1)
-        url = f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}"
         super().download_file(filename, url, self.headers, filename)
 
     def check(self, uri):
@@ -83,15 +87,15 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
 
         # Get CSRF token
         r = session.get(
-            f"https://www.loverslab.com/files/file/{parts.netloc}",
+            f"https://www.loverslab.com/",
             allow_redirects=True,
             headers=self.headers
         )
         s = soup(r.content, "lxml")
+        menu = s.find("ul", id="elUserLink_menu")
 
         signoutTag = (
-            s.find("ul", id="elUserLink_menu")
-            .find("li", attrs={"data-menuitem": "signout"}).find("a")
+            menu.find("li", attrs={"data-menuitem": "signout"}).find("a")
         )
         signoutUrl = signoutTag["href"]
         csrfToken = urlparse(signoutUrl).query[8:]
@@ -109,7 +113,7 @@ class LoversLabHandler(Handler, LoversLabAuthenticator, SimpleHttpDownloader):
         mod_id = f"{parts.netloc}?{queryString}"
 
         r = session.get(
-            f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}",
+            f"https://www.loverslab.com/files/file/{mod_id}&csrfKey={csrfToken}",  # noqa
             allow_redirects=True,
             headers=self.headers
         )
